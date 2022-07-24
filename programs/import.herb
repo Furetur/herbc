@@ -1,0 +1,4 @@
+import herb.lang.a;
+import .a.b;
+import alias = .x.y;
+import alias = herb.a.x;
