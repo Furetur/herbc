@@ -9,7 +9,7 @@ importDecl
 
 importPath
     : IDENT ('.' IDENT)* #absImportPath
-    | '.' IDENT ('.' IDENT) #relImportPath
+    | '.' IDENT ('.' IDENT)* #relImportPath
     ;
 
 IDENT: [a-zA-Z_]+[a-zA-Z_0-9]*;

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from antlr4 import FileStream, CommonTokenStream
 
 from src.ast.declarations import ImportPath, Import
@@ -7,8 +9,8 @@ from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
 
 
-def parse(filepath: str) -> File:
-    input_stream = FileStream(filepath)
+def parse(path: Path) -> File:
+    input_stream = FileStream(str(path))
     lexer = HerbLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = HerbParser(stream)
@@ -40,7 +42,7 @@ class HerbParserVisitor(HerbVisitor):
         while (id := ctx.IDENT(i)) is not None:
             i += 1
             path.append(str(id))
-        return ImportPath(is_relative=True, path=path)
+        return ImportPath(is_relative=True, path=tuple(path))
 
     def visitAbsImportPath(self, ctx:HerbParser.AbsImportPathContext) -> ImportPath:
         path = []
@@ -48,4 +50,4 @@ class HerbParserVisitor(HerbVisitor):
         while (id := ctx.IDENT(i)) is not None:
             i += 1
             path.append(str(id))
-        return ImportPath(is_relative=False, path=path)
+        return ImportPath(is_relative=False, path=tuple(path))

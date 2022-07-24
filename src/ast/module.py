@@ -12,5 +12,6 @@ class File(Node):
     imports: List[Import]
 
 
+@dataclasses.dataclass()
 class Module(Node):
     imports: List[Import]
