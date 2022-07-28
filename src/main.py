@@ -1,10 +1,9 @@
 import sys
 from pathlib import Path
 
-from antlr4 import *
-
-from src.ast.declarations import ImportPath
-from src.defs.env import ProjectEnvironment
+from src.defs.env import Project, Compiler
+from src.defs.errs import CompilationInterrupted, Errors
+from src.defs.pos import Pos
 from src.load import load_entryfile
 from src.parser.generated.HerbLexer import HerbLexer
 from src.parser.generated.HerbParser import HerbParser
@@ -12,11 +11,19 @@ from src.parser.parser import parse
 
 
 def main():
-    proj = ProjectEnvironment(root=Path("programs") / "proj1", root_packages=dict())
-    main_import = ImportPath(is_relative=True, path=["main.herb"])
+    compiler = Compiler(
+        project=Project(root=Path("programs") / "proj1", root_packages=dict()),
+        errors=Errors()
+    )
+
     loaded = dict()
-    load_entryfile(proj, main_import, loaded)
-    print(loaded)
+    try:
+        load_entryfile(compiler, Path("programs") / "proj1" / "main.herb", loaded)
+        print(loaded)
+    except CompilationInterrupted as e:
+        compiler.errors.print_errors()
+        print(e)
+        exit(1)
 
 
 if __name__ == '__main__':

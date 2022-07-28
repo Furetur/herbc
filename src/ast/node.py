@@ -1,2 +1,5 @@
+from src.defs.pos import Pos
+
+
 class Node:
-    pass
+    pos: Pos
