@@ -1,7 +1,8 @@
 import dataclasses
+from pathlib import Path
 from typing import List
 
-from src.defs.pos import Pos
+from src.span import Span
 
 
 class CompilationInterrupted(Exception):
@@ -14,12 +15,13 @@ class CompilationInterrupted(Exception):
 
 @dataclasses.dataclass
 class CompilationError:
-    pos: Pos
+    filepath: Path
+    span: Span
     message: str
     hint: str
 
     def __str__(self):
-        return f"{self.pos}: {self.message}\n\tHint: {self.hint}"
+        return f"{self.filepath}:{self.span}: {self.message}\n\tHint: {self.hint}"
 
 
 class Errors:

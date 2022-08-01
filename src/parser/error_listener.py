@@ -1,12 +1,10 @@
 from pathlib import Path
 
-import antlr4
 from antlr4.error.ErrorListener import ErrorListener
-from antlr4.error.Errors import ParseCancellationException
 
-from src.defs.env import Compiler
-from src.defs.errs import CompilationError
-from src.defs.pos import Pos
+from src.env import Compiler
+from src.errs import CompilationError
+from src.span import Span
 
 
 class HerbErrorListener(ErrorListener):
@@ -17,7 +15,7 @@ class HerbErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.compiler.add_error(CompilationError(
-            pos=Pos(filepath=self.path, line=line, column=column),
+            span=Span(filepath=self.path, line=line, column=column),
             message=msg,
             hint="this is a parsing error."
         ))
