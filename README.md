@@ -1,5 +1,9 @@
 # Herb Compiler
 
+## Dependencies
+
+* clang-14: `bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
+
 ## How to use
 
 **Terminal must be at project root**.
