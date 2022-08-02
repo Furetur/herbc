@@ -10,6 +10,7 @@ from src.errs import Errors, CompilationError
 @dataclasses.dataclass
 class Project:
     root: Path
+    runtime: Path
     root_packages: Dict[str, Path]
 
     def build_dir(self):
