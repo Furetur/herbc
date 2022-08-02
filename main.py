@@ -7,7 +7,7 @@ from src.defs.constants import RUNTIME_DIR_NAME
 from src.make_executable import make_executable
 from src.env import Project, Compiler
 from src.errs import CompilationInterrupted, Errors
-from src.gen import generate
+from src.gen.generate import generate
 from src.loader import Loader
 
 

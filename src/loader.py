@@ -28,8 +28,7 @@ class Loader:
     def load_file(self, path: Path) -> Module:
         if not path.is_file():
             raise CompilationInterrupted(f"File not found: {path}")
-        file = parse(self.compiler, path)
-        module = Module(imports=file.imports, path=path, span=INVALID_SPAN, parent=None)
+        module = parse(self.compiler, path)
         self.__loaded[path] = module
         self.__load_imported(module)
         return module
