@@ -1,6 +1,6 @@
 grammar Herb;
 
-prog : importDecl*;
+prog : importDecl* EOF;
 
 importDecl
     : 'import' importPath ';' #importWithoutAlias

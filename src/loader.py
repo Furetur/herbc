@@ -1,6 +1,6 @@
 import os.path
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 
 from src.ast import Import, Module
 from src.defs.constants import HERB_FILE_EXT
@@ -18,8 +18,12 @@ class Loader:
         self.compiler = compiler
         self.__loaded = dict()
 
-    def get_loaded(self):
-        return self.__loaded
+    def get_loaded_modules(self) -> List[Module]:
+        """
+        Topologically sorts the modules
+        :return:
+        """
+        pass
 
     def load_file(self, path: Path) -> Module:
         if not path.is_file():

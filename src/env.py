@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict
 
 from src.ast import Node
+from src.defs.constants import BUILD_DIR_NAME
 from src.errs import Errors, CompilationError
 
 
@@ -10,6 +11,9 @@ from src.errs import Errors, CompilationError
 class Project:
     root: Path
     root_packages: Dict[str, Path]
+
+    def build_dir(self):
+        return self.root / BUILD_DIR_NAME
 
 
 @dataclasses.dataclass

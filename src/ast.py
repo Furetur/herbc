@@ -50,3 +50,6 @@ class Import(Decl):
 class Module(Node):
     path: Path
     imports: List[Import]
+
+    def name(self) -> str:
+        return self.path.stem

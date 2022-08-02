@@ -15,7 +15,8 @@ class HerbErrorListener(ErrorListener):
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         self.compiler.add_error(CompilationError(
-            span=Span(filepath=self.path, line=line, column=column),
+            filepath=self.path,
+            span=Span(line=line, column=column),
             message=msg,
             hint="this is a parsing error."
         ))
