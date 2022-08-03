@@ -9,13 +9,15 @@ from src.errs import CompilationInterrupted
 
 def make_executable(compiler: Compiler, outpath: Path):
     ll_files = [str(path.absolute()) for path in get_all_ll_files(compiler)]
-    code = subprocess.run(
+    result = subprocess.run(
         f"clang-14 {(' '.join(ll_files))} -o {str(outpath)}",
         cwd=Path.cwd(),
-        shell=True
-    ).returncode
-    if code != 0:
-        raise CompilationInterrupted("clang returned non-null exit code")
+        shell=True,
+        text=True,
+        capture_output=True
+    )
+    if result.returncode != 0:
+        raise CompilationInterrupted(f"clang returned non-null exit code:\n{result.stdout}\n{result.stderr}")
 
 
 def get_all_ll_files(compiler: Compiler) -> List[Path]:

@@ -1,0 +1,4 @@
+fn main() {
+    print(12345);
+    print(54321);
+}

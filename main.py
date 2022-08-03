@@ -30,10 +30,12 @@ def main():
 
     runtime_path = Path(os.path.abspath(__file__)).parent / RUNTIME_DIR_NAME
 
-    run_compiler(entry_file_path, output_file_path, runtime_path)
+    ok = run_compiler(entry_file_path, output_file_path, runtime_path)
+    if not ok:
+        exit(1)
 
 
-def run_compiler(filepath: Path, outpath: Path, runtime_path: Path):
+def run_compiler(filepath: Path, outpath: Path, runtime_path: Path) -> bool:
     compiler = Compiler(
         project=Project(root=filepath.parent, root_packages=dict(), runtime=runtime_path),
         errors=Errors()
@@ -49,7 +51,8 @@ def run_compiler(filepath: Path, outpath: Path, runtime_path: Path):
         compiler.errors.print_errors()
         print("ERROR:", end=" ")
         print(e)
-        exit(1)
+        return False
+    return True
 
 
 if __name__ == '__main__':
