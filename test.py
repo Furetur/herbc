@@ -2,6 +2,7 @@ import dataclasses
 import io
 import os.path
 import subprocess
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Union, List, Tuple
@@ -69,7 +70,12 @@ class Test:
     def __run(self) -> Tuple[TestType, str, str]:
         compiler_out = io.StringIO()
         with redirect_stdout(compiler_out):
-            ok = run_compiler(self.path, temp_program_path, runtime_path)
+            try:
+                ok = run_compiler(self.path, temp_program_path, runtime_path)
+            except Exception as e:
+                ok = False
+                print(str(e), file=sys.stderr)
+
         if not ok:
             return TestType.CompileTimeError, compiler_out.getvalue(), ""
         result = subprocess.run([], executable=temp_program_path, text=True, capture_output=True)
