@@ -1,0 +1,9 @@
+const a = b;
+const b = c;
+const c = 1;
+
+fn main() {
+    print(a);
+    print(b);
+    print(c);
+}

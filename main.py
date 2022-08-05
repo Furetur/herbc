@@ -4,9 +4,10 @@ from pathlib import Path
 from argparse import ArgumentParser
 
 from src.defs.constants import RUNTIME_DIR_NAME
-from src.make_executable import make_executable
-from src.env import Project, Compiler
-from src.errs import CompilationInterrupted, Errors
+from src.normalize import normalize
+from src.context.compilation_ctx import CompilationCtx
+from src.context.project_ctx import ProjectCtx
+from src.context.error_ctx import CompilationInterrupted, ErrorCtx
 from src.gen.generate import generate
 from src.loader import Loader
 
@@ -36,21 +37,24 @@ def main():
 
 
 def run_compiler(filepath: Path, outpath: Path, runtime_path: Path) -> bool:
-    compiler = Compiler(
-        project=Project(root=filepath.parent, root_packages=dict(), runtime=runtime_path),
-        errors=Errors()
+    compiler = CompilationCtx(
+        project=ProjectCtx(root=filepath.parent, root_packages=dict(), runtime=runtime_path),
+        errors=ErrorCtx(),
+        outpath=outpath,
     )
     loader = Loader(compiler)
 
     compiler.project.build_dir().mkdir(exist_ok=True)
     try:
         entry = loader.load_file(filepath)
+        normalize(compiler, entry)
         generate(compiler, entry)
-        make_executable(compiler, outpath)
     except CompilationInterrupted as e:
         compiler.errors.print_errors()
-        print("ERROR:", end=" ")
-        print(e)
+        if e.message != "":
+            print(f"ERROR: {e.message}")
+        else:
+            print("Compilation failed!")
         return False
     return True
 

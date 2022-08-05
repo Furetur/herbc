@@ -1,6 +1,11 @@
 grammar Herb;
 
-prog : importDecl* funcDecl* EOF;
+prog : importDecl* topLevelDecl* EOF;
+
+topLevelDecl
+    : funcDecl
+    | varDecl
+    ;
 
 importDecl
     : 'import' importPath ';' #importWithoutAlias
@@ -16,13 +21,19 @@ funcDecl
     : 'fn' IDENT '(' ')' '{' stmt* '}'
     ;
 
+varDecl
+    : 'const' IDENT '=' expr ';'
+    ;
+
 stmt
     : expr ';' # exprStmt
+    | varDecl # varDeclStmt
     ;
 
 expr
     : INT_LITERAL # intLit
     | IDENT '(' commaSeparatedExprs? ')' # funCall
+    | IDENT # reference
     ;
 
 commaSeparatedExprs: expr (',' expr)*;

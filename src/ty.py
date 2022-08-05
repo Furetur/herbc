@@ -3,7 +3,11 @@ import dataclasses
 
 @dataclasses.dataclass(kw_only=True)
 class Ty:
-    pass
+    name: str
+
+    def __str__(self):
+        return "int"
 
 
-TyInt = Ty()
+TyUnknown = Ty(name="unknown")
+TyInt = Ty(name="int")

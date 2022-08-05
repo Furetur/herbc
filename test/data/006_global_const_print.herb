@@ -1,0 +1,6 @@
+
+const a = 101;
+
+fn main() {
+    print(a);
+}

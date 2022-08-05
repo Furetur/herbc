@@ -2,13 +2,13 @@ from pathlib import Path
 
 from antlr4.error.ErrorListener import ErrorListener
 
-from src.env import Compiler
-from src.errs import CompilationError
+from src.context.compilation_ctx import CompilationCtx
+from src.context.error_ctx import CompilationError
 from src.span import Span
 
 
 class HerbErrorListener(ErrorListener):
-    def __init__(self, compiler: Compiler, filepath: Path):
+    def __init__(self, compiler: CompilationCtx, filepath: Path):
         self.compiler = compiler
         self.path = filepath
         self.has_errors = False

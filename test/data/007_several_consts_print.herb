@@ -1,0 +1,10 @@
+
+const a = 1;
+const b = 2;
+
+fn main() {
+    print(a);
+    const c = 3;
+    print(b);
+    print(c);
+}

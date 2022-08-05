@@ -21,10 +21,13 @@ class CompilationError:
     hint: str
 
     def __str__(self):
-        return f"{self.filepath}:{self.span}: {self.message}\n\tHint: {self.hint}"
+        if self.hint != "":
+            return f"{self.filepath}:{self.span}: {self.message}\n\tHint: {self.hint}"
+        else:
+            return f"{self.filepath}:{self.span}: {self.message}\n"
 
 
-class Errors:
+class ErrorCtx:
     errors: List[CompilationError]
 
     def __init__(self):
@@ -32,6 +35,9 @@ class Errors:
 
     def add_error(self, err: CompilationError):
         self.errors.append(err)
+
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0
 
     def print_errors(self):
         for err in self.errors:

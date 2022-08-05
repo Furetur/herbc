@@ -1,0 +1,6 @@
+
+fn main() {
+    print(a);
+}
+
+const a = 6;

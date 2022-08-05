@@ -3,6 +3,7 @@ import io
 import os.path
 import subprocess
 import sys
+import traceback
 from enum import Enum
 from pathlib import Path
 from typing import Union, List, Tuple
@@ -22,6 +23,7 @@ class TestType(Enum):
     CompileTimeError = 1
     RuntimeError = 2
     IncorrectOutput = 3
+    CompilerCrashed = 4
 
 
 @dataclasses.dataclass()
@@ -73,8 +75,7 @@ class Test:
             try:
                 ok = run_compiler(self.path, temp_program_path, runtime_path)
             except Exception as e:
-                ok = False
-                print(str(e), file=sys.stderr)
+                return TestType.CompilerCrashed, "", traceback.format_exc()
 
         if not ok:
             return TestType.CompileTimeError, compiler_out.getvalue(), ""

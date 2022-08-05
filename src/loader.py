@@ -4,17 +4,16 @@ from typing import Dict, List
 
 from src.ast import Import, Module
 from src.defs.constants import HERB_FILE_EXT
-from src.env import Compiler
-from src.errs import CompilationInterrupted
-from src.span import INVALID_SPAN
+from src.context.compilation_ctx import CompilationCtx
+from src.context.error_ctx import CompilationInterrupted
 from src.parser import parse
 
 
 class Loader:
-    compiler: Compiler
+    compiler: CompilationCtx
     __loaded: Dict[Path, Module]
 
-    def __init__(self, compiler: Compiler):
+    def __init__(self, compiler: CompilationCtx):
         self.compiler = compiler
         self.__loaded = dict()
 
