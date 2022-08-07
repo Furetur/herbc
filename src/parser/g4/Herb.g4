@@ -32,12 +32,14 @@ stmt
 
 expr
     : INT_LITERAL # intLit
+    | BOOL_LITERAL # boolLit
     | IDENT '(' commaSeparatedExprs? ')' # funCall
     | IDENT # reference
     ;
 
 commaSeparatedExprs: expr (',' expr)*;
 
+BOOL_LITERAL: 'true' | 'false';
 INT_LITERAL: [1-9][0-9]*;
 IDENT: [a-zA-Z_]+[a-zA-Z_0-9]*;
 WS: [ \n\t\r]+ -> skip;

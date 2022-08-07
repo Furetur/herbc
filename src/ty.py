@@ -6,8 +6,10 @@ class Ty:
     name: str
 
     def __str__(self):
-        return "int"
+        return self.name
 
 
 TyUnknown = Ty(name="unknown")
+TyVoid = Ty(name="void")
 TyInt = Ty(name="int")
+TyBool = Ty(name="bool")

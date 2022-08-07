@@ -1,9 +1,9 @@
 from typing import cast, Dict
 
-from src.ast import Module, AstVisitor, IntLiteral, Node, VarDecl, IdentExpr, Decl
+from src.ast import Module, AstVisitor, IntLiteral, Node, VarDecl, IdentExpr, Decl, BoolLiteral, Literal
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
-from src.ty import TyInt
+from src.ty import TyInt, TyBool
 
 
 def evaluate(ctx: CompilationCtx, m: Module):
@@ -25,7 +25,7 @@ class CheckConstants(AstVisitor):
         self.ctx = ctx
 
     def visit_var_decl(self, v: 'VarDecl'):
-        if type(v.initializer) is not IntLiteral and type(v.initializer) is not IdentExpr:
+        if type(v.initializer) is not IntLiteral and type(v.initializer) is not BoolLiteral and type(v.initializer) is not IdentExpr:
             self.ctx.add_error_to_node(
                 v,
                 message="Only literals and identifiers are allowed in const declarations",
@@ -39,9 +39,12 @@ class EvaluateVisitor(AstVisitor):
     def __init__(self):
         self.evaluated = dict()
 
-    def visit_ident_expr(self, i: 'IdentExpr') -> Node:
+    def visit_ident_expr(self, i: 'IdentExpr'):
         decl = cast(VarDecl, i.decl)
         assert decl is not None and type(decl) is VarDecl
-        initializer = cast(IntLiteral, decl.initializer)
-        assert type(initializer) is IntLiteral
-        i.parent.swap_child(old=i, new=IntLiteral(value=initializer.value, span=i.span, parent=None, ty=TyInt))
+        initializer = decl.initializer
+        assert isinstance(initializer, Literal)
+        if isinstance(initializer, IntLiteral):
+            i.replace(IntLiteral(value=initializer.value, span=i.span, parent=None, ty=TyInt))
+        elif isinstance(initializer, BoolLiteral):
+            i.replace(BoolLiteral(value=initializer.value, span=i.span, parent=None, ty=TyBool))

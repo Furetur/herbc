@@ -1,3 +1,13 @@
-import .variables;
 
-const b = 1;
+
+const a = true;
+const z = 1;
+fn main() {
+    print(true);
+    print(z);
+    print(2);
+    print(false);
+    print(a);
+    const b = false;
+    print(b);
+}

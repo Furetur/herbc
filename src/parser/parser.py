@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Tuple
 
-from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr
+from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
+    BoolLiteral
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
-from src.ty import TyInt, TyUnknown
+from src.ty import TyInt, TyUnknown, TyBool
 
 
 class HerbParserVisitor(HerbVisitor):
@@ -72,6 +73,11 @@ class HerbParserVisitor(HerbVisitor):
     def visitIntLit(self, ctx: HerbParser.IntLitContext):
         value = int(ctx.getText())
         return IntLiteral(value=value, parent=None, span=Span.from_antlr(ctx), ty=TyInt)
+
+    def visitBoolLit(self, ctx:HerbParser.BoolLitContext):
+        text = ctx.getText()
+        assert text in ["true", "false"]
+        return BoolLiteral(value=(text == "true"), parent=None, span=Span.from_antlr(ctx), ty=TyBool)
 
     def visitFunCall(self, ctx: HerbParser.FunCallContext):
         name = str(ctx.IDENT())

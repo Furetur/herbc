@@ -2,48 +2,9 @@ import dataclasses
 from pathlib import Path
 from typing import Union, List, Tuple, Dict
 
+from src.ast.visitor import AstVisitor
 from src.span import Span
-from src.ty import Ty, TyInt
-
-
-class AstVisitor:
-    def visit(self, n: 'Node'):
-        return n.accept(self)
-
-    def visit_module(self, m: 'Module'):
-        for i in m.imports:
-            self.visit(i)
-        for d in m.top_level_decls:
-            self.visit(d)
-
-    # declarations
-
-    def visit_import(self, i: 'Import'):
-        pass
-
-    def visit_fun_decl(self, fn: 'FunDecl'):
-        for stmt in fn.body:
-            self.visit(stmt)
-
-    def visit_var_decl(self, v: 'VarDecl'):
-        return self.visit(v.initializer)
-
-    # expressions
-
-    def visit_int_literal(self, lit: 'IntLiteral'):
-        pass
-
-    def visit_fun_call(self, call: 'FunCall'):
-        for expr in call.args:
-            self.visit(expr)
-
-    # statements
-
-    def visit_expr_stmt(self, stmt: 'ExprStmt'):
-        return self.visit(stmt.expr)
-
-    def visit_ident_expr(self, i: 'IdentExpr'):
-        pass
+from src.ty import Ty
 
 
 class Scope:
@@ -76,6 +37,10 @@ class Node:
 
     def swap_child(self, old: 'Node', new: 'Node'):
         ...
+
+    def replace(self, other: 'Node'):
+        assert self.parent is not None
+        self.parent.swap_child(old=self, new=other)
 
     def module(self) -> 'Module':
         if type(self) is Module:
@@ -222,21 +187,6 @@ class VarDecl(Decl):
 @dataclasses.dataclass(kw_only=True)
 class Expr(Node):
     ty: Ty
-
-
-@dataclasses.dataclass(kw_only=True)
-class IntLiteral(Expr):
-    ty = TyInt
-    value: int
-
-    def accept(self, visitor: AstVisitor):
-        return visitor.visit_int_literal(self)
-
-    def swap_child(self, old: 'Node', new: 'Node'):
-        assert False
-
-    def __str__(self):
-        return f"{self.value} as {self.ty}"
 
 
 @dataclasses.dataclass(kw_only=True)

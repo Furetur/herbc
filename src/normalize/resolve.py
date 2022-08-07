@@ -1,8 +1,10 @@
 from typing import Union
 
-from src.ast import Module, AstVisitor, Scope, ScopeNode, Decl, FunDecl, IdentExpr, VarDecl, Import
+from src.ast import Module, AstVisitor, Scope, ScopeNode, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall
+from src.ast.builtins import PrintInt, PrintBool
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
+from src.ty import TyBool, TyInt, TyVoid
 
 
 def resolve(compiler: CompilationCtx, mod: Module):
