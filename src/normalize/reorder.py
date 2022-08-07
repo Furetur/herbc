@@ -20,9 +20,10 @@ def get_var_decl_order(ctx: CompilationCtx, m: Module) -> List[VarDecl]:
     vars: Dict[str, VarDecl] = {d.declared_name(): cast(VarDecl, d) for d in m.top_level_decls if type(d) is VarDecl}
     # build graph
     finder = ReferenceFinder()
-    graph = defaultdict(set)
+    graph = dict()
     for v in vars.values():
         refs = finder.find_refs(v.initializer)
+        graph[v.declared_name()] = set()
         for r in refs:
             if type(r) is VarDecl and r.is_top_level() and r.module() is m:
                 graph[v.declared_name()].add(r.declared_name())
