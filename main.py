@@ -46,9 +46,11 @@ def run_compiler(filepath: Path, outpath: Path, runtime_path: Path) -> bool:
 
     compiler.project.build_dir().mkdir(exist_ok=True)
     try:
-        entry = loader.load_file(filepath)
-        normalize(compiler, entry)
-        generate(compiler, entry)
+        loader.load_file(filepath)
+        modules = loader.get_loaded_modules()
+        for mod in modules:
+            normalize(compiler, mod)
+        generate(compiler, modules)
     except CompilationInterrupted as e:
         compiler.errors.print_errors()
         if e.message != "":

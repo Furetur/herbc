@@ -1,4 +1,7 @@
-import herb.lang.a;
-import .a.b;
-import alias = .x.y;
-import alias = herb.a.x;
+import .print;
+
+const a = 1;
+
+fn main() {
+    print(a);
+}

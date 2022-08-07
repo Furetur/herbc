@@ -1,5 +1,3 @@
-const a = 1;
+import .print;
 
-fn main() {
-    print(a);
-}
+const c = 1;

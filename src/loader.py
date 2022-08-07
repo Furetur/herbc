@@ -1,3 +1,4 @@
+import graphlib
 import os.path
 from pathlib import Path
 from typing import Dict, List
@@ -22,11 +23,34 @@ class Loader:
         Topologically sorts the modules
         :return:
         """
-        pass
+        assert len(self.__loaded) > 0
+        # build graph
+        graph = dict()
+        for path, mod in self.__loaded.items():
+            graph[path] = set()
+            for imp in mod.imports:
+                graph[path].add(imp.resolved_path())
+        # sort
+        try:
+            order = list(graphlib.TopologicalSorter(graph).static_order())
+        except graphlib.CycleError as e:
+            cycle = e.args[1]
+            mod = self.__loaded[cycle[0]]
+            fancy_cycle = ' -> '.join(f"'{p}'" for p in cycle)
+            self.compiler.add_error_to_node(
+                mod,
+                message="Circular imports are not allowed",
+                hint=f"Detected loop: {fancy_cycle}"
+            )
+            raise CompilationInterrupted()
+
+        return [self.__loaded[path] for path in order]
 
     def load_file(self, path: Path) -> Module:
         if not path.is_file():
             raise CompilationInterrupted(f"File not found: {path}")
+        if path in self.__loaded:
+            return self.__loaded[path]
         module = parse(self.compiler, path)
         self.__loaded[path] = module
         self.__load_imported(module)
