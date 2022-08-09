@@ -14,7 +14,7 @@ class HerbParserVisitor(HerbVisitor):
         self.filepath = filepath
 
     def visitProg(self, ctx: HerbParser.ProgContext) -> Module:
-        mod = Module(imports=[], top_level_decls=[], path=self.filepath, span=Span(0, 0), parent=None, scope=Scope())
+        mod = Module(imports=[], top_level_decls=[], path=self.filepath, span=Span(0, 0), parent=None,  )
         # imports
         i = 0
         while (impCtx := ctx.importDecl(i)) is not None:
@@ -44,7 +44,7 @@ class HerbParserVisitor(HerbVisitor):
     def visitFuncDecl(self, ctx: HerbParser.FuncDeclContext):
         name = str(ctx.IDENT())
 
-        fun_decl = FunDecl(name=name, body=[], parent=None, span=Span.from_antlr(ctx), scope=Scope())
+        fun_decl = FunDecl(name=name, body=[], parent=None, span=Span.from_antlr(ctx),  )
 
         i = 0
         while (stmtCtx := ctx.stmt(i)) is not None:
@@ -72,17 +72,17 @@ class HerbParserVisitor(HerbVisitor):
 
     def visitIntLit(self, ctx: HerbParser.IntLitContext):
         value = int(ctx.getText())
-        return IntLiteral(value=value, parent=None, span=Span.from_antlr(ctx), ty=TyInt)
+        return IntLiteral(value=value, parent=None, span=Span.from_antlr(ctx))
 
     def visitBoolLit(self, ctx:HerbParser.BoolLitContext):
         text = ctx.getText()
         assert text in ["true", "false"]
-        return BoolLiteral(value=(text == "true"), parent=None, span=Span.from_antlr(ctx), ty=TyBool)
+        return BoolLiteral(value=(text == "true"), parent=None, span=Span.from_antlr(ctx))
 
     def visitFunCall(self, ctx: HerbParser.FunCallContext):
         name = str(ctx.IDENT())
         assert name == "print", "unimplemented: can only call 'print' function"
-        call = FunCall(fn_name=name, args=[], parent=None, span=Span.from_antlr(ctx), ty=TyInt)
+        call = FunCall(name=name, args=[], parent=None, span=Span.from_antlr(ctx), ty=TyInt)
         for arg in self.visit(ctx.commaSeparatedExprs()):
             arg: Expr
             arg.parent = call

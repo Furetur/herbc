@@ -19,9 +19,9 @@ def generate(ctx: CompilationCtx, modules: List[Module]):
 
 def generate_module(ctx: CompilationCtx, mod: Module) -> Path:
     visitor = GenVisitor(mod)
-    visitor.visit(mod)
+    mod.accept(visitor, None)
 
-    ll_outpath = ctx.project.build_dir() / (mod.name() + LL_FILE_EXT)
+    ll_outpath = ctx.project.build_dir() / (mod.name + LL_FILE_EXT)
     with open(str(ll_outpath), "w") as f:
         f.write(str(visitor.module))
     return ll_outpath

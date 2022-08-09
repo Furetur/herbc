@@ -2,6 +2,7 @@ import dataclasses
 from pathlib import Path
 
 from src.ast import Node
+from src.ast.utils import module
 from src.context.project_ctx import ProjectCtx
 from src.context.error_ctx import ErrorCtx, CompilationError
 
@@ -13,7 +14,7 @@ class CompilationCtx:
     outpath: Path
 
     def add_error_to_node(self, node: Node, message: str, hint: str):
-        self.errors.add_error(CompilationError(span=node.span, message=message, hint=hint, filepath=node.module().path))
+        self.errors.add_error(CompilationError(span=node.span, message=message, hint=hint, filepath=module(node).path))
 
     def add_error(self, err: CompilationError):
         self.errors.add_error(err)

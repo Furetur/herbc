@@ -1,39 +1,50 @@
-import dataclasses
-from typing import cast
+from typing import TYPE_CHECKING, TypeVar
 
-from src.ast import Expr, Node
-from src.ast.visitor import AstVisitor
+if TYPE_CHECKING:
+    pass
+from src.ast.base import Expr
+from src.ast.visitors import AstTransformer, AstVisitor
 
 
-@dataclasses.dataclass(kw_only=True)
+D = TypeVar("D")
+R = TypeVar("R")
+
+
 class PrintInt(Expr):
     arg: Expr
 
-    def accept(self, visitor: AstVisitor):
-        visitor.visit_print_int(self)
+    def __init__(self, *, arg: Expr, **kwargs):
+        super().__init__(**kwargs)
+        self.arg = arg
 
-    def swap_child(self, old: 'Node', new: 'Node'):
-        assert self.arg is old
-        assert isinstance(new, Expr)
-        self.arg = cast(Expr, new)
-        new.parent = self
+    def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
+        return visitor.visit_print_int(self, data)
+
+    def accept_children(self, visitor: AstVisitor[D, R], data: D):
+        self.arg.accept(visitor, data)
+
+    def transform_children(self, transformer: AstTransformer[D], data: D):
+        self.arg = self.arg.accept(transformer, data)
 
     def __str__(self):
         return f"print_int({self.arg})"
 
 
-@dataclasses.dataclass(kw_only=True)
 class PrintBool(Expr):
     arg: Expr
 
-    def accept(self, visitor: AstVisitor):
-        visitor.visit_print_bool(self)
+    def __init__(self, *, arg: Expr, **kwargs):
+        super().__init__(**kwargs)
+        self.arg = arg
 
-    def swap_child(self, old: 'Node', new: 'Node'):
-        assert self.arg is old
-        assert isinstance(new, Expr)
-        self.arg = cast(Expr, new)
-        new.parent = self
+    def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
+        return visitor.visit_print_bool(self, data)
+
+    def accept_children(self, visitor: AstVisitor[D, R], data: D):
+        self.arg.accept(visitor, data)
+
+    def transform_children(self, transformer: AstTransformer[D], data: D):
+        self.arg = self.arg.accept(transformer, data)
 
     def __str__(self):
         return f"print_bool({self.arg})"

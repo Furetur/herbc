@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import Set, List, cast, Dict, Iterable
 
 from src.ast import Module, AstVisitor, Decl, IdentExpr, VarDecl, FunDecl, Node
+from src.ast.utils import module, is_top_level
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
 
@@ -25,7 +26,7 @@ def get_var_decl_order(ctx: CompilationCtx, m: Module) -> List[VarDecl]:
         refs = finder.find_refs(v.initializer)
         graph[v.declared_name()] = set()
         for r in refs:
-            if type(r) is VarDecl and r.is_top_level() and r.module() is m:
+            if type(r) is VarDecl and is_top_level(r) and module(r) is m:
                 graph[v.declared_name()].add(r.declared_name())
     # topological sort
     try:
@@ -33,7 +34,7 @@ def get_var_decl_order(ctx: CompilationCtx, m: Module) -> List[VarDecl]:
     except graphlib.CycleError as e:
         cycle = e.args[1]
         assert len(cycle) > 0
-        decl = m.scope.get_declaration(cycle[0])
+        decl = m.get_declaration(cycle[0])
         ctx.add_error_to_node(decl, message="Declarations are cyclic", hint=" -> ".join(cycle))
         raise CompilationInterrupted()
     return [vars[name] for name in order]
@@ -48,13 +49,16 @@ class ReferenceFinder(AstVisitor):
 
     def find_refs(self, n: Node) -> Iterable[Decl]:
         self.clear()
-        self.visit(n)
+        n.accept(self, None)
         return self.references
 
     def clear(self):
         self.references.clear()
 
-    def visit_ident_expr(self, i: 'IdentExpr'):
+    def visit_node(self, n: Node, data):
+        n.accept_children(self, None)
+
+    def visit_ident_expr(self, i: 'IdentExpr', data):
         assert i.decl is not None
         if i.decl not in self.references:
             self.references.append(i.decl)

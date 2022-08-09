@@ -3,16 +3,15 @@ from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
 
 
-def check_main(compiler: CompilationCtx, entry: Module):
-    s = entry.scope
-    if "main" not in s:
+def check_main(compiler: CompilationCtx, mod: Module):
+    if "main" not in mod:
         compiler.add_error_to_node(
-            node=entry,
+            node=mod,
             message="Entry module must have a 'main' function",
             hint="Define a main function: fn main() { }"
         )
         raise CompilationInterrupted()
-    decl = s.get_declaration("main")
+    decl = mod.get_declaration("main")
     if type(decl) is not FunDecl:
         compiler.add_error_to_node(
             node=decl,
