@@ -1,0 +1,6 @@
+
+fn main() {
+    print("First");
+    print(" second");
+    print(" три 😂");
+}

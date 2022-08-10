@@ -1,6 +1,6 @@
 from llvmlite import ir
 
-from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, PrintStr
+from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, PrintStr, VarDecl
 from src.ast.builtins import PrintBool, PrintInt
 from src.gen.defs import *
 
@@ -10,12 +10,23 @@ class GenVisitor(AstVisitor):
     builder: ir.IRBuilder
     print_int: ir.Function
 
+    global_id: int = 0
+
     def __init__(self, m: Module):
         self.module = ir.Module(name=m.name)
         self.module.triple = "x86_64-pc-linux-gnu"
         self.print_int = ir.Function(self.module, print_int_fn_type, name=PRINT_INT_FN_NAME)
         self.print_bool = ir.Function(self.module, print_bool_fn_type, name=PRINT_BOOL_FN_NAME)
         self.print_str = ir.Function(self.module, print_str_fn_type, name=PRINT_STR_FN_NAME)
+
+    def gen_string(self, value: str) -> ir.GlobalVariable:
+        data = bytes(value, encoding='utf-8') + b'\0'
+        typ = ir.ArrayType(ir.IntType(8), len(data))
+        lit = ir.GlobalVariable(self.module, typ, name=f"strlit.{self.global_id}")
+        lit.global_constant = True
+        lit.initializer = ir.Constant(typ, bytearray(data))
+        self.global_id += 1
+        return lit
 
     def visit_node(self, n: Node, data):
         n.accept_children(self, data)
@@ -52,10 +63,8 @@ class GenVisitor(AstVisitor):
         return ir.Constant(bool_type, 1 if lit.value else 0)
 
     def visit_str_literal(self, n: 'StrLiteral', data) -> ir.Constant:
-        data = bytes(n.value, encoding='utf-8') + b'\0'
-        typ = ir.ArrayType(ir.IntType(8), len(data))
-        lit = ir.GlobalVariable(self.module, typ, name="strlit")
-        lit.global_constant = True
-        lit.initializer = ir.Constant(typ, bytearray(data))
+        if isinstance(n.parent, VarDecl):
+            return None
+        lit = self.gen_string(n.value)
         byteptr = self.builder.bitcast(lit, str_type)
         return byteptr
