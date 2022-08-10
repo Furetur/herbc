@@ -2,7 +2,7 @@ import graphlib
 from collections import defaultdict
 from typing import Set, List, cast, Dict, Iterable
 
-from src.ast import Module, AstVisitor, Decl, IdentExpr, VarDecl, FunDecl, Node
+from src.ast import Module, Decl, IdentExpr, VarDecl, FunDecl, Node, AstWalker
 from src.ast.utils import module, is_top_level
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -40,7 +40,7 @@ def get_var_decl_order(ctx: CompilationCtx, m: Module) -> List[VarDecl]:
     return [vars[name] for name in order]
 
 
-class ReferenceFinder(AstVisitor):
+class ReferenceFinder(AstWalker):
     # TODO: Decl is not hashable
     references: List[Decl]
 
@@ -49,16 +49,13 @@ class ReferenceFinder(AstVisitor):
 
     def find_refs(self, n: Node) -> Iterable[Decl]:
         self.clear()
-        n.accept(self, None)
+        self.walk(n)
         return self.references
 
     def clear(self):
         self.references.clear()
 
-    def visit_node(self, n: Node, data):
-        n.accept_children(self, None)
-
-    def visit_ident_expr(self, i: 'IdentExpr', data):
+    def walk_ident_expr(self, i: 'IdentExpr'):
         assert i.decl is not None
         if i.decl not in self.references:
             self.references.append(i.decl)

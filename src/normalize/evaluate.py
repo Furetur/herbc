@@ -1,15 +1,15 @@
 from typing import cast, Dict
 
-from src.ast import Module, AstVisitor, IntLiteral, Node, VarDecl, IdentExpr, Decl, BoolLiteral, Literal, AstTransformer
+from src.ast import Module, IntLiteral, Node, VarDecl, IdentExpr, Decl, BoolLiteral, Literal, \
+    AstTransformer, AstWalker
 from src.ast.utils import fancy_pos
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
-from src.ty import TyInt, TyBool
 
 
 def evaluate(ctx: CompilationCtx, m: Module):
     c = CheckConstants(ctx)
-    m.accept(c, None)
+    c.walk(m)
     if ctx.has_errors():
         raise CompilationInterrupted()
     v = EvaluateTransformer()
@@ -18,17 +18,15 @@ def evaluate(ctx: CompilationCtx, m: Module):
         raise CompilationInterrupted()
 
 
-class CheckConstants(AstVisitor):
+class CheckConstants(AstWalker):
     """
     Check "const a = expr;" declarations
     """
     def __init__(self, ctx: CompilationCtx):
+        super().__init__()
         self.ctx = ctx
 
-    def visit_node(self, n: Node, data):
-        n.accept_children(self, data)
-
-    def visit_var_decl(self, v: 'VarDecl', data):
+    def walk_var_decl(self, v: 'VarDecl'):
         if type(v.initializer) is not IntLiteral and type(v.initializer) is not BoolLiteral and type(v.initializer) is not IdentExpr:
             self.ctx.add_error_to_node(
                 v,

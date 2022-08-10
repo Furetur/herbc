@@ -6,5 +6,5 @@ from src.ast.declarations import *
 from src.ast.expressions import *
 from src.ast.expressions_literals import *
 from src.ast.statements import *
-from src.ast.visitors import AstVisitor, AstTransformer
+from src.ast.visitors import AstVisitor, AstTransformer, AstWalker
 
