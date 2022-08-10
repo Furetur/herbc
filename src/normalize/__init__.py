@@ -1,4 +1,5 @@
 from src.ast import Module
+from src.ast.fixverify import set_parents
 from src.context.compilation_ctx import CompilationCtx
 from src.normalize.builtins import builtins
 from src.normalize.check_main import check_main
@@ -14,4 +15,6 @@ def normalize(ctx: CompilationCtx, module: Module):
     reorder_top_level_decls(ctx, module)
     typecheck(ctx, module)
     builtins(ctx, module)
+    set_parents(module)
     evaluate(ctx, module)
+    set_parents(module)

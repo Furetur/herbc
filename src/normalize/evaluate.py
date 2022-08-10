@@ -41,7 +41,7 @@ class EvaluateTransformer(AstTransformer):
     def __init__(self):
         self.evaluated = dict()
 
-    def visit_ident_expr(self, i: 'IdentExpr', data) -> Literal:
+    def visit_ident_expr(self, i: 'IdentExpr', data: None) -> Literal:
         decl = cast(VarDecl, i.decl)
         assert decl is not None and type(decl) is VarDecl
         initializer = decl.initializer

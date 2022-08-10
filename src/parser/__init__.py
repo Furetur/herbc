@@ -3,6 +3,7 @@ from pathlib import Path
 from antlr4 import FileStream, CommonTokenStream
 
 from src.ast import Module
+from src.ast.fixverify import set_parents
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
 from src.parser.error_listener import HerbErrorListener
@@ -26,4 +27,6 @@ def parse(compiler: CompilationCtx, path: Path) -> Module:
     tree = parser.prog()
     if error_listener.has_errors:
         raise CompilationInterrupted()
-    return tree.accept(HerbParserVisitor(path))
+    mod = tree.accept(HerbParserVisitor(path))
+    set_parents(mod)
+    return mod

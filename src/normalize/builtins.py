@@ -24,11 +24,7 @@ class PrintTransformer(AstTransformer):
         assert arg.ty is TyInt or arg.ty is TyBool
         if arg.ty is TyInt:
             new = PrintInt(arg=arg, span=call.span, ty=TyVoid, parent=None)
-            arg.parent = new
-            new.parent = call.parent
             return new
         else:
             new = PrintBool(arg=arg, span=call.span, ty=TyVoid, parent=None)
-            arg.parent = new
-            new.parent = call.parent
             return new
