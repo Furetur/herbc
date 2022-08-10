@@ -1,0 +1,14 @@
+
+const i1 = 111;
+const T = true;
+const name = "Имя";
+
+fn main() {
+    print(i1);
+    const i2 = 222;
+    print(T);
+    print(i2);
+    const lastName = "Фамилия";
+    print(name);
+    print(lastName);
+}
