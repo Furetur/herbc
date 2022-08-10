@@ -13,7 +13,7 @@ from src.parser.parser import HerbParserVisitor
 
 
 def parse(compiler: CompilationCtx, path: Path) -> Module:
-    input_stream = FileStream(str(path))
+    input_stream = FileStream(str(path), encoding='utf-8')
     error_listener = HerbErrorListener(compiler, path)
     lexer = HerbLexer(input_stream)
     lexer.removeErrorListeners()

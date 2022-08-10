@@ -41,6 +41,9 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_bool_literal(self, n: 'BoolLiteral', data: D) -> R:
         return self.visit_expression(n, data)
 
+    def visit_str_literal(self, n: 'StrLiteral', data: D) -> R:
+        return self.visit_expression(n, data)
+
     def visit_fun_call(self, n: 'FunCall', data: D) -> R:
         return self.visit_expression(n, data)
 
@@ -48,6 +51,9 @@ class AstVisitor(Generic[D, R], ABC):
         return self.visit_expression(n, data)
 
     def visit_print_bool(self, n: 'PrintBool', data: D) -> R:
+        return self.visit_expression(n, data)
+
+    def visit_print_str(self, n: 'PrintStr', data: D) -> R:
         return self.visit_expression(n, data)
 
     def visit_ident_expr(self, n: 'IdentExpr', data: D) -> R:

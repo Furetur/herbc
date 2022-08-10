@@ -1,4 +1,5 @@
 from typing import cast, Dict
+from copy import copy
 
 from src.ast import Module, IntLiteral, Node, VarDecl, IdentExpr, Decl, BoolLiteral, Literal, \
     AstTransformer, AstWalker
@@ -27,7 +28,7 @@ class CheckConstants(AstWalker):
         self.ctx = ctx
 
     def walk_var_decl(self, v: 'VarDecl'):
-        if type(v.initializer) is not IntLiteral and type(v.initializer) is not BoolLiteral and type(v.initializer) is not IdentExpr:
+        if not isinstance(v.initializer, Literal) and type(v.initializer) is not IdentExpr:
             self.ctx.add_error_to_node(
                 v,
                 message="Only literals and identifiers are allowed in const declarations",
@@ -46,7 +47,4 @@ class EvaluateTransformer(AstTransformer):
         assert decl is not None and type(decl) is VarDecl
         initializer = decl.initializer
         assert isinstance(initializer, Literal)
-        if isinstance(initializer, IntLiteral):
-            return IntLiteral(value=initializer.value, span=i.span, parent=None)
-        elif isinstance(initializer, BoolLiteral):
-            return BoolLiteral(value=initializer.value, span=i.span, parent=None)
+        return copy(initializer)

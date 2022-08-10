@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral
+    BoolLiteral, StrLiteral
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -34,11 +34,11 @@ class HerbParserVisitor(HerbVisitor):
     def visitImportWithAlias(self, ctx: HerbParser.ImportWithAliasContext):
         alias = str(ctx.IDENT())
         is_relative, path = ctx.importPath().accept(self)
-        return Import(alias=alias, path=path, is_relative=is_relative, span=Span.from_antlr(ctx), parent=None)
+        return Import(alias=alias, path=path, is_relative=is_relative, span=Span.from_antlr(ctx))
 
     def visitImportWithoutAlias(self, ctx: HerbParser.ImportWithoutAliasContext):
         is_relative, path = ctx.importPath().accept(self)
-        return Import(alias="", path=path, is_relative=is_relative, span=Span.from_antlr(ctx), parent=None)
+        return Import(alias="", path=path, is_relative=is_relative, span=Span.from_antlr(ctx))
 
     def visitFuncDecl(self, ctx: HerbParser.FuncDeclContext):
         statements = []
@@ -46,7 +46,7 @@ class HerbParserVisitor(HerbVisitor):
         while (stmtCtx := ctx.stmt(i)) is not None:
             i += 1
             statements.append(self.visit(stmtCtx))
-        return FunDecl(name=str(ctx.IDENT()), body=statements, parent=None, span=Span.from_antlr(ctx))
+        return FunDecl(name=str(ctx.IDENT()), body=statements, span=Span.from_antlr(ctx))
 
     def visitVarDecl(self, ctx: HerbParser.VarDeclContext):
         return VarDecl(
@@ -58,12 +58,16 @@ class HerbParserVisitor(HerbVisitor):
     # ===== EXPRESSIONS =====
 
     def visitIntLit(self, ctx: HerbParser.IntLitContext):
-        return IntLiteral(value=int(ctx.getText()), parent=None, span=Span.from_antlr(ctx))
+        return IntLiteral(value=int(ctx.getText()), span=Span.from_antlr(ctx))
 
     def visitBoolLit(self, ctx:HerbParser.BoolLitContext):
         text = ctx.getText()
         assert text in ["true", "false"]
-        return BoolLiteral(value=(text == "true"), parent=None, span=Span.from_antlr(ctx))
+        return BoolLiteral(value=(text == "true"), span=Span.from_antlr(ctx))
+
+    def visitStrLit(self, ctx:HerbParser.StrLitContext):
+        text = ctx.getText()[1:-1]
+        return StrLiteral(value=text, span=Span.from_antlr(ctx))
 
     def visitFunCall(self, ctx: HerbParser.FunCallContext):
         name = str(ctx.IDENT())
@@ -75,12 +79,12 @@ class HerbParserVisitor(HerbVisitor):
         )
 
     def visitReference(self, ctx: HerbParser.ReferenceContext):
-        return IdentExpr(name=str(ctx.IDENT()), span=Span.from_antlr(ctx), parent=None, ty=TyUnknown)
+        return IdentExpr(name=str(ctx.IDENT()), span=Span.from_antlr(ctx))
 
     # ===== STATEMENTS =====
 
     def visitExprStmt(self, ctx: HerbParser.ExprStmtContext):
-        return ExprStmt(expr=self.visit(ctx.expr()), parent=None, span=Span.from_antlr(ctx))
+        return ExprStmt(expr=self.visit(ctx.expr()), span=Span.from_antlr(ctx))
 
     def visitVarDeclStmt(self, ctx: HerbParser.VarDeclStmtContext):
         return self.visit(ctx.varDecl())

@@ -113,11 +113,6 @@ def main():
     n_passed = 0
 
     for test in find_tests():
-        # clean
-        # TODO: this should not be necessary
-        if test_data_build.is_dir():
-            for f in test_data_build.glob("*"):
-                f.unlink()
         n_tests += 1
         result = test.run()
         if result.is_successful():

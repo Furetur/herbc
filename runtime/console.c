@@ -11,3 +11,7 @@ void print_bool(char b) {
         printf("true");
     }
 }
+
+void print_str(char* s) {
+    printf("%s", s);
+}

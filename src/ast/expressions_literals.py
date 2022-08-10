@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from src.ast import *
 
 from src.ast.base import Expr
-from src.ty import TyInt, TyBool
+from src.ty import TyInt, TyBool, TyStr
 
 
 class Literal(Expr, ABC):
@@ -34,6 +34,10 @@ class IntLiteral(Literal):
 class BoolLiteral(Literal):
     value: bool
 
+    def __init__(self, *, value: bool, **kwargs):
+        super().__init__(ty=TyBool, **kwargs)
+        self.value = value
+
     def accept(self, visitor: 'AstVisitor', data: 'D') -> 'R':
         return visitor.visit_bool_literal(self, data)
 
@@ -43,10 +47,23 @@ class BoolLiteral(Literal):
     def transform_children(self, transformer: 'AstTransformer', data: 'D'):
         pass
 
-    def __init__(self, *, value: bool, **kwargs):
-        super().__init__(ty=TyBool, **kwargs)
-        self.value = value
-
     def __str__(self):
         v = "true" if self.value else "false"
         return f"{v} as bool"
+
+
+class StrLiteral(Literal):
+    value: str
+
+    def __init__(self, *, value: str, **kwargs):
+        super().__init__(ty=TyStr, **kwargs)
+        self.value = value
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_str_literal(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        pass
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        pass
