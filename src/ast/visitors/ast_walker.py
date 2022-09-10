@@ -78,23 +78,11 @@ class AstWalker(AstVisitor[None, None]):
     def visit_fun_call(self, n: 'FunCall', data:  None) :
         self.walk_fun_call(n)
 
-    def walk_print_int(self, n: 'PrintInt'):
+    def walk_print(self, n: 'Print'):
         self.walk_expression(n)
 
-    def visit_print_int(self, n: 'PrintInt', data:  None) :
-        self.walk_print_int(n)
-
-    def walk_print_bool(self, n: 'PrintBool'):
-        self.walk_expression(n)
-
-    def visit_print_bool(self, n: 'PrintBool', data:  None) :
-        self.walk_print_bool(n)
-
-    def walk_print_str(self, n: 'PrintStr'):
-        self.walk_expression(n)
-
-    def visit_print_str(self, n: 'PrintStr', data: None):
-        self.walk_print_str(n)
+    def visit_print(self, n: 'Print', data: None):
+        self.walk_print(n)
 
     def walk_ident_expr(self, n: 'IdentExpr'):
         self.walk_expression(n)

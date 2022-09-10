@@ -9,11 +9,22 @@ D = TypeVar('D')
 R = TypeVar('R')
 
 
+__node_id = -1
+
+
+def next_node_id() -> int:
+    global __node_id
+    __node_id += 1
+    return __node_id
+
+
 class Node(ABC):
+    id: int
     span: Span
     parent: Union['Node', None]
 
     def __init__(self, *, span: Span, parent: Union['Node', None] = None):
+        self.id = next_node_id()
         self.span = span
         self.parent = parent
 
@@ -25,6 +36,12 @@ class Node(ABC):
 
     @abstractmethod
     def transform_children(self, transformer: AstTransformer[D], data: D): ...
+
+    def __eq__(self, other):
+        return isinstance(other, Node) and self.id == other.id
+
+    def __hash__(self):
+        return self.id
 
 
 class Expr(Node, ABC):

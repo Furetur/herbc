@@ -40,6 +40,11 @@ class Module(Node, Scope):
     def name(self) -> str:
         return self.path.stem
 
+    @property
+    def unique_name(self):
+        # TODO: there can be collisions
+        return str(hash(self.path)) + "_" + self.name
+
     def __str__(self):
         decl = "\n".join([str(i) for i in self.declarations])
         return f"// Module {self.path}\n{decl}"

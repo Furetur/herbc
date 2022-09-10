@@ -1,10 +1,15 @@
 from llvmlite import ir
 
+from src.ast import Decl
+from src.ast.utils import module
+
+LL_TRIPLE = "x86_64-pc-linux-gnu"
 
 # primitive types
 void_type = ir.VoidType()
 int_type = ir.IntType(32)
 bool_type = ir.IntType(8)
+byte_type = ir.IntType(8)
 byteptr = ir.PointerType(bool_type)
 str_type = byteptr
 
@@ -20,3 +25,6 @@ PRINT_BOOL_FN_NAME = "print_bool"
 
 print_str_fn_type = ir.FunctionType(void_type, [str_type])
 PRINT_STR_FN_NAME = "print_str"
+
+def global_name(self, decl: Decl):
+    return f"{module(decl).unique_name}.{decl.declared_name()}"
