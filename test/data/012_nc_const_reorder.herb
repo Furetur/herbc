@@ -1,6 +1,6 @@
-const a = b;
-const b = c;
-const c = 1;
+var a = b;
+var b = c;
+var c = 1;
 
 fn main() {
     print(a);

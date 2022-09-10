@@ -22,7 +22,7 @@ funcDecl
     ;
 
 varDecl
-    : 'const' IDENT '=' expr ';'
+    : 'var' IDENT '=' expr ';'
     ;
 
 stmt

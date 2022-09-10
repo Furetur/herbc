@@ -1,18 +1,44 @@
-from typing import Union
+from typing import Union, List
 
-from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node
+from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
-from src.ty import TyBool, TyInt, TyVoid
 
 
 def resolve(compiler: CompilationCtx, mod: Module):
+    reorder_top_level_decls(mod)
+    mod.accept(CheckConstants(compiler), None)
+    if compiler.has_errors():
+        raise CompilationInterrupted()
     v = ResolverVisitor(compiler)
     mod.accept(v, None)
     if compiler.has_errors():
         raise CompilationInterrupted()
 
+
+def reorder_top_level_decls(m: Module):
+    imports: List[Decl] = [d for d in m.top_level_decls if isinstance(d, Import)]
+    vars = [d for d in m.top_level_decls if isinstance(d, VarDecl)]
+    funs = [d for d in m.top_level_decls if type(d) is FunDecl]
+    m.top_level_decls = imports + vars + funs
+
+
+class CheckConstants(AstWalker):
+    compiler: CompilationCtx
+
+    def __init__(self, compiler: CompilationCtx):
+        self.compiler = compiler
+
+    def walk_var_decl(self, n: 'VarDecl'):
+        if not is_top_level(n):
+            return
+        if not isinstance(n.initializer, Literal):
+            self.compiler.add_error_to_node(
+                node=n.initializer,
+                message="Global variable initializer can only be a literal",
+                hint="Replace with a literal"
+            )
 
 class ResolverVisitor(AstWalker):
     compiler: CompilationCtx

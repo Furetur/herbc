@@ -1,13 +1,14 @@
 
 
-const a = true;
-const z = 1;
+var a = true;
+var z = 1;
+
 fn main() {
     print(true);
     print(z);
     print(2);
     print(false);
     print(a);
-    const b = false;
+    var b = false;
     print(b);
 }

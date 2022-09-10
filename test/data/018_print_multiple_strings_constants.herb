@@ -1,12 +1,12 @@
 
-const a = "123";
-const b = "45";
+var a = "123";
+var b = "45";
 fn main() {
     print(a);
-    const c = "---";
+    var c = "---";
     print("000");
     print(b);
-    const d = "😂";
+    var d = "😂";
     print(c);
     print(d);
 }

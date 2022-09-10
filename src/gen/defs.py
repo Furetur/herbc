@@ -2,6 +2,7 @@ from llvmlite import ir
 
 from src.ast import Decl
 from src.ast.utils import module
+from src.ty import Ty, TyInt, TyBool, TyStr
 
 LL_TRIPLE = "x86_64-pc-linux-gnu"
 
@@ -26,5 +27,17 @@ PRINT_BOOL_FN_NAME = "print_bool"
 print_str_fn_type = ir.FunctionType(void_type, [str_type])
 PRINT_STR_FN_NAME = "print_str"
 
-def global_name(self, decl: Decl):
+
+def global_name(decl: Decl):
     return f"{module(decl).unique_name}.{decl.declared_name()}"
+
+
+def ll_type(ty: Ty) -> ir.Type:
+    if ty == TyInt:
+        return int_type
+    elif ty == TyBool:
+        return bool_type
+    elif ty == TyStr:
+        return str_type
+    else:
+        assert False, f"unexpected type: {ty}"

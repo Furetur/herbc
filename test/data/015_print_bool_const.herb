@@ -1,11 +1,11 @@
 
-const T = true;
-const F = false;
+var T = true;
+var F = false;
 
 fn main() {
     print(12345);
     print(T);
     print(F);
-    const TT = true;
+    var TT = true;
     print(TT);
 }

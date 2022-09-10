@@ -1,7 +1,7 @@
 
-const a = c;
-const b = a;
-const c = b;
+var a = c;
+var b = a;
+var c = b;
 
 fn main() {
     print(a);

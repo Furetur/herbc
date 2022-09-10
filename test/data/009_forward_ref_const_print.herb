@@ -3,4 +3,4 @@ fn main() {
     print(a);
 }
 
-const a = 6;
+var a = 6;

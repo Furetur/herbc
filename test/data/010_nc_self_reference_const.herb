@@ -1,5 +1,5 @@
 
-const a = a;
+var a = a;
 
 fn main() {
     print(a);
