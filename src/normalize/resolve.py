@@ -1,7 +1,6 @@
 from typing import Union
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node
-from src.ast.builtins import PrintInt, PrintBool
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted

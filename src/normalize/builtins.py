@@ -1,7 +1,6 @@
 from src.ast import FunCall, Module, AstTransformer, Node
-from src.ast.builtins import PrintInt, PrintBool, PrintStr
+from src.ast.builtins import Print
 from src.context.compilation_ctx import CompilationCtx
-from src.ty import TyInt, TyBool, TyVoid, TyUnknown, TyStr
 
 
 def builtins(ctx: CompilationCtx, mod: Module):
@@ -21,11 +20,4 @@ class PrintTransformer(AstTransformer):
             return super().visit_fun_call(call, data)
 
         arg = call.args[0].accept(self, None)
-        assert arg.ty is not None and arg.ty is not TyUnknown
-        if arg.ty is TyInt:
-            return PrintInt(arg=arg, span=call.span)
-        elif arg.ty is TyBool:
-            return PrintBool(arg=arg, span=call.span)
-        elif arg.ty is TyStr:
-            return PrintStr(arg=arg, span=call.span)
-
+        return Print(arg=arg, span=call.span)

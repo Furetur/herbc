@@ -47,22 +47,16 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_fun_call(self, n: 'FunCall', data: D) -> R:
         return self.visit_expression(n, data)
 
-    def visit_print_int(self, n: 'PrintInt', data: D) -> R:
-        return self.visit_expression(n, data)
-
-    def visit_print_bool(self, n: 'PrintBool', data: D) -> R:
-        return self.visit_expression(n, data)
-
-    def visit_print_str(self, n: 'PrintStr', data: D) -> R:
-        return self.visit_expression(n, data)
-
-    def visit_ident_expr(self, n: 'IdentExpr', data: D) -> R:
+    def visit_print(self, n: 'Print', data: D) -> R:
         return self.visit_expression(n, data)
 
     # statements
 
-    def visit_statement(self, n: 'Stmt', data: D) -> R:
-        return self.visit_node(n, data)
+    def visit_ident_expr(self, n: 'IdentExpr', data: D) -> R:
+        return self.visit_expression(n, data)
 
     def visit_expr_stmt(self, n: 'ExprStmt', data: D) -> R:
         return self.visit_statement(n, data)
+
+    def visit_statement(self, n: 'Stmt', data: D) -> R:
+        return self.visit_node(n, data)

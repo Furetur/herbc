@@ -1,8 +1,7 @@
-from llvmlite import ir
-
-from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, PrintStr, VarDecl
-from src.ast.builtins import PrintBool, PrintInt
+from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
+    Print
 from src.gen.defs import *
+from src.ty import TyInt, TyBool, TyStr
 
 
 class GenVisitor(AstVisitor):
@@ -44,17 +43,17 @@ class GenVisitor(AstVisitor):
     def visit_fun_call(self, call: 'FunCall', data):
         assert False
 
-    def visit_print_int(self, p: 'PrintInt', data):
-        arg = p.arg.accept(self, None)
-        self.builder.call(self.print_int, [arg])
-
-    def visit_print_bool(self, p: 'PrintBool', data):
-        arg = p.arg.accept(self, None)
-        self.builder.call(self.print_bool, [arg])
-
-    def visit_print_str(self, n: 'PrintStr', data: None):
+    def visit_print(self, n: 'Print', data):
         arg = n.arg.accept(self, None)
-        self.builder.call(self.print_str, [arg])
+        if n.arg.ty == TyInt:
+            fn = self.print_int
+        elif n.arg.ty == TyBool:
+            fn = self.print_bool
+        elif n.arg.ty == TyStr:
+            fn = self.print_str
+        else:
+            assert False, "unreachable"
+        self.builder.call(fn, [arg])
 
     def visit_int_literal(self, lit: 'IntLiteral', data) -> ir.Constant:
         return ir.Constant(int_type, lit.value)
