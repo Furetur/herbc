@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -56,6 +56,22 @@ class HerbParserVisitor(HerbVisitor):
         )
 
     # ===== EXPRESSIONS =====
+
+    def visitAdditiveBinopExpr(self, ctx:HerbParser.AdditiveBinopExprContext):
+        return BinopExpr(
+            left=self.visit(ctx.expr(0)),
+            right=self.visit(ctx.expr(1)),
+            kind=BinopKind.PLUS,
+            span=Span.from_antlr(ctx)
+        )
+
+    def visitLogicalBinopExpr(self, ctx:HerbParser.LogicalBinopExprContext):
+        return BinopExpr(
+            left=self.visit(ctx.expr(0)),
+            right=self.visit(ctx.expr(1)),
+            kind=BinopKind.LESS,
+            span=Span.from_antlr(ctx)
+        )
 
     def visitIntLit(self, ctx: HerbParser.IntLitContext):
         return IntLiteral(value=int(ctx.getText()), span=Span.from_antlr(ctx))

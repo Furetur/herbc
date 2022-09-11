@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt
+    Print, IdentExpr, AssignStmt, BinopKind
 from src.ast.utils import is_top_level
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -115,15 +115,26 @@ class GenVisitor(AstVisitor):
 
     # Expressions
 
+    def visit_binop(self, n: 'BinopExpr', data) -> ir.Value:
+        left = n.left.accept(self, None)
+        right = n.right.accept(self, None)
+        if n.kind == BinopKind.PLUS:
+            return self.builder.add(left, right)
+        elif n.kind == BinopKind.LESS:
+            return self.builder.icmp_signed('<', left, right)
+        else:
+            assert False
+
     def visit_fun_call(self, call: 'FunCall', data):
         assert False
 
     def visit_print(self, n: 'Print', data):
-        arg = n.arg.accept(self, None)
+        arg: ir.Value = n.arg.accept(self, None)
         if n.arg.ty == TyInt:
             fn = self.header[PRINT_INT_FN_NAME]
         elif n.arg.ty == TyBool:
             fn = self.header[PRINT_BOOL_FN_NAME]
+            arg = self.builder.zext(arg, byte_type)
         elif n.arg.ty == TyStr:
             fn = self.header[PRINT_STR_FN_NAME]
         else:

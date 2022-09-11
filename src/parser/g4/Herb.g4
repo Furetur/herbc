@@ -38,7 +38,9 @@ stmt
     ;
 
 expr
-    : INT_LITERAL # intLit
+    : expr '+' expr # additiveBinopExpr
+    | expr '<' expr # logicalBinopExpr
+    | INT_LITERAL # intLit
     | BOOL_LITERAL # boolLit
     | STRINGLITERAL # strLit
     | IDENT '(' commaSeparatedExprs? ')' # funCall

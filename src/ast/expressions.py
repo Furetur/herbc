@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, TYPE_CHECKING, Union
 
 from src.ast.base import Expr
@@ -53,3 +54,34 @@ class IdentExpr(Expr):
     def __str__(self):
         decl = fancy_pos(self.decl) if self.decl is not None else "???"
         return f"{self.name} (declared at '{decl}')"
+
+
+class BinopKind(Enum):
+    PLUS = '+'
+    LESS = '<'
+
+
+class BinopExpr(Expr):
+    left: 'Expr'
+    right: 'Expr'
+    kind: BinopKind
+
+    def __init__(self, *, left: 'Expr', right: 'Expr', kind: 'BinopKind', **kwargs):
+        super(BinopExpr, self).__init__(**kwargs)
+        self.left = left
+        self.right = right
+        self.kind = kind
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_binop(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        self.left.accept(visitor, data)
+        self.right.accept(visitor, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.left = self.left.accept(transformer, data)
+        self.right = self.right.accept(transformer, data)
+
+    def __str__(self):
+        return f"{self.left} {self.kind.value} {self.right}"

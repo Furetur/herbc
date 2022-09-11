@@ -55,6 +55,12 @@ class AstWalker(AstVisitor[None, None]):
     def visit_expression(self, n: 'Expr', data: None):
         self.walk_expression(n)
 
+    def walk_binop(self, n: 'BinopExpr'):
+        self.walk_expression(n)
+
+    def visit_binop(self, n: 'BinopExpr', data: 'D'):
+        self.walk_binop(n)
+
     def walk_int_literal(self, n: 'IntLiteral'):
         self.walk_expression(n)
 

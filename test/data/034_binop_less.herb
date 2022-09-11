@@ -1,0 +1,9 @@
+var a = 10;
+
+fn main() {
+    var b = 100;
+
+    print(a + 89 < b);
+    print(a + 89 + 1 < b);
+    print(a + 89 + 1 < b + 1);
+}

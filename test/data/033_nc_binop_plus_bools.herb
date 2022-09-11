@@ -1,0 +1,5 @@
+var a = 10;
+
+fn main() {
+    print(a + false);
+}

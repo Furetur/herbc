@@ -1,0 +1,7 @@
+var a = 10;
+
+fn main() {
+    var b = 15;
+
+    print(a + b + 100);
+}
