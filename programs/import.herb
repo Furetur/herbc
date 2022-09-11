@@ -1,7 +1,0 @@
-import .print;
-
-const a = 1;
-
-fn main() {
-    print(a);
-}
