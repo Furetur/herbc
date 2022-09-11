@@ -1,0 +1,7 @@
+var a = "hello";
+
+fn main() {
+    print(a);
+    a = "world";
+    print(a);
+}

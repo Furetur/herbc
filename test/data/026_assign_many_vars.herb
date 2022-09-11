@@ -1,0 +1,16 @@
+var global = 1;
+var str = "HelloWorld";
+
+fn main() {
+    print(str);
+    var a = 2;
+    print(global);
+    global = a;
+    print(global);
+    var localstr = str;
+    print(localstr);
+    str = "other";
+    print(localstr);
+    localstr = "oother";
+    print(localstr);
+}

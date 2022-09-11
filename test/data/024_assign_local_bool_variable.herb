@@ -1,0 +1,6 @@
+fn main() {
+    var a = true;
+    print(a);
+    a = false;
+    print(a);
+}

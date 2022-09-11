@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, TYPE_CHECKING
+import hashlib
 
 from src.ast.scope import Scope
 from src.ast.base import Node
@@ -43,7 +44,8 @@ class Module(Node, Scope):
     @property
     def unique_name(self):
         # TODO: there can be collisions
-        return str(hash(self.path)) + "_" + self.name
+        hashed = hashlib.md5(bytes(str(self.path.absolute()), encoding='utf-8')).hexdigest()
+        return hashed + "_" + self.name
 
     def __str__(self):
         decl = "\n".join([str(i) for i in self.declarations])

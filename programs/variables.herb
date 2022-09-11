@@ -1,3 +1,5 @@
-import .print;
+var a = 1;
 
-const c = 1;
+fn main() {
+    main = 3;
+}

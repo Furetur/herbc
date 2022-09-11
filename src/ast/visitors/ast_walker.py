@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from src.ast import *
 from src.ast.visitors.ast_visitor import AstVisitor
@@ -25,25 +26,25 @@ class AstWalker(AstVisitor[None, None]):
     def walk_declaration(self, n: 'Decl'):
         self.walk_statement(n)
 
-    def visit_declaration(self, n: 'Decl', data:  None):
+    def visit_declaration(self, n: 'Decl', data: None):
         self.walk_declaration(n)
 
     def walk_import(self, n: 'Import'):
         self.walk_declaration(n)
 
-    def visit_import(self, n: 'Import', data:  None):
+    def visit_import(self, n: 'Import', data: None):
         self.walk_import(n)
 
     def walk_fun_decl(self, n: 'FunDecl'):
         self.walk_declaration(n)
 
-    def visit_fun_decl(self, n: 'FunDecl', data:  None):
+    def visit_fun_decl(self, n: 'FunDecl', data: None):
         self.walk_fun_decl(n)
 
     def walk_var_decl(self, n: 'VarDecl'):
         self.walk_declaration(n)
 
-    def visit_var_decl(self, n: 'VarDecl', data:  None):
+    def visit_var_decl(self, n: 'VarDecl', data: None):
         self.walk_var_decl(n)
 
     # expressions
@@ -51,19 +52,19 @@ class AstWalker(AstVisitor[None, None]):
     def walk_expression(self, n: 'Expr'):
         self.walk_node(n)
 
-    def visit_expression(self, n: 'Expr', data:  None) :
+    def visit_expression(self, n: 'Expr', data: None):
         self.walk_expression(n)
 
     def walk_int_literal(self, n: 'IntLiteral'):
         self.walk_expression(n)
 
-    def visit_int_literal(self, n: 'IntLiteral', data:  None) :
+    def visit_int_literal(self, n: 'IntLiteral', data: None):
         self.walk_int_literal(n)
 
     def walk_bool_literal(self, n: 'BoolLiteral'):
         self.walk_expression(n)
 
-    def visit_bool_literal(self, n: 'BoolLiteral', data:  None) :
+    def visit_bool_literal(self, n: 'BoolLiteral', data: None):
         self.walk_bool_literal(n)
 
     def walk_str_literal(self, n: 'StrLiteral'):
@@ -75,7 +76,7 @@ class AstWalker(AstVisitor[None, None]):
     def walk_fun_call(self, n: 'FunCall'):
         self.walk_expression(n)
 
-    def visit_fun_call(self, n: 'FunCall', data:  None) :
+    def visit_fun_call(self, n: 'FunCall', data: None):
         self.walk_fun_call(n)
 
     def walk_print(self, n: 'Print'):
@@ -87,7 +88,7 @@ class AstWalker(AstVisitor[None, None]):
     def walk_ident_expr(self, n: 'IdentExpr'):
         self.walk_expression(n)
 
-    def visit_ident_expr(self, n: 'IdentExpr', data:  None) :
+    def visit_ident_expr(self, n: 'IdentExpr', data: None):
         self.walk_ident_expr(n)
 
     # statements
@@ -95,11 +96,17 @@ class AstWalker(AstVisitor[None, None]):
     def walk_statement(self, n: 'Stmt'):
         self.walk_node(n)
 
-    def visit_statement(self, n: 'Stmt', data:  None) :
+    def visit_statement(self, n: 'Stmt', data: None):
         self.walk_statement(n)
 
     def walk_expr_stmt(self, n: 'ExprStmt'):
         self.walk_statement(n)
 
-    def visit_expr_stmt(self, n: 'ExprStmt', data:  None) :
+    def visit_expr_stmt(self, n: 'ExprStmt', data: None):
         self.walk_expr_stmt(n)
+
+    def walk_assign_stmt(self, n: 'AssignStmt'):
+        self.walk_statement(n)
+
+    def visit_assign_stmt(self, n: 'AssignStmt', data: None):
+        self.walk_assign_stmt(n)

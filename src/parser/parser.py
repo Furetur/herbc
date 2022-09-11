@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral
+    BoolLiteral, StrLiteral, AssignStmt
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -86,8 +86,8 @@ class HerbParserVisitor(HerbVisitor):
     def visitExprStmt(self, ctx: HerbParser.ExprStmtContext):
         return ExprStmt(expr=self.visit(ctx.expr()), span=Span.from_antlr(ctx))
 
-    def visitVarDeclStmt(self, ctx: HerbParser.VarDeclStmtContext):
-        return self.visit(ctx.varDecl())
+    def visitAssign(self, ctx:HerbParser.AssignContext):
+        return AssignStmt(lvalue=self.visit(ctx.expr(0)), rvalue=self.visit(ctx.expr(1)), span=Span.from_antlr(ctx))
 
     # ===== UTIL =====
 

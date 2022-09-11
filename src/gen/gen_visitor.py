@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr
+    Print, IdentExpr, AssignStmt
 from src.ast.utils import is_top_level
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -61,10 +61,24 @@ class GenVisitor(AstVisitor):
         self.globals[lit_name] = lit
         return lit
 
+    def gen_ptr_to_decl(self, decl: Decl) -> ir.Value:
+        if is_top_level(decl):
+            # global variable
+            name = global_name(decl)
+            assert name in self.globals, "Global variable was not generated"
+            return self.globals[global_name(decl)]
+        else:
+            # local variable
+            assert decl in self.locals, "Local variable was not generated"
+            return self.locals[decl]
+
+
     # Visitor
 
     def visit_node(self, n: Node, data):
         n.accept_children(self, data)
+
+    # Declarations
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
         assert fn.name == "main"
@@ -90,6 +104,17 @@ class GenVisitor(AstVisitor):
             self.builder.store(initializer, alloca)
             self.locals[n] = alloca
 
+    # Statements
+
+    def visit_assign_stmt(self, n: 'AssignStmt', data):
+        assert isinstance(n.lvalue, IdentExpr) and n.lvalue.decl is not None
+        ptr = self.gen_ptr_to_decl(n.lvalue.decl)
+        value = n.rvalue.accept(self, None)
+        self.builder.store(value, ptr)
+
+
+    # Expressions
+
     def visit_fun_call(self, call: 'FunCall', data):
         assert False
 
@@ -107,14 +132,7 @@ class GenVisitor(AstVisitor):
 
     def visit_ident_expr(self, n: 'IdentExpr', data) -> ir.Value:
         assert n.decl is not None
-        if is_top_level(n.decl):
-            # global variable
-            ptr = self.globals[global_name(n.decl)]
-            assert ptr is not None, "Global variable was not generated"
-        else:
-            # local variable
-            ptr = self.locals[n.decl]
-            assert ptr is not None, "Local is not generated"
+        ptr = self.gen_ptr_to_decl(n.decl)
         load = self.builder.load(ptr)
         return self.builder.bitcast(load, ll_type(n.ty))
 

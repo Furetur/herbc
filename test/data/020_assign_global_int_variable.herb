@@ -1,0 +1,7 @@
+var a = 101;
+
+fn main() {
+    print(a);
+    a = 202;
+    print(a);
+}

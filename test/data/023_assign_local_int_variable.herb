@@ -1,0 +1,6 @@
+fn main() {
+    var a = 111;
+    print(a);
+    a = 222;
+    print(a);
+}

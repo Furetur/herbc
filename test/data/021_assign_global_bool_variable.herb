@@ -1,0 +1,7 @@
+var a = true;
+
+fn main() {
+    print(a);
+    a = false;
+    print(a);
+}

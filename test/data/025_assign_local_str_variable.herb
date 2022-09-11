@@ -1,0 +1,6 @@
+fn main() {
+    var a = "first";
+    print(a);
+    a = "second";
+    print(a);
+}

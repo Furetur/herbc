@@ -25,9 +25,16 @@ varDecl
     : 'var' IDENT '=' expr ';'
     ;
 
+assign
+    : expr '=' expr ';'
+    ;
+
+exprStmt: expr ';';
+
 stmt
-    : expr ';' # exprStmt
-    | varDecl # varDeclStmt
+    : exprStmt
+    | varDecl
+    | assign
     ;
 
 expr

@@ -23,3 +23,27 @@ class ExprStmt(Stmt):
 
     def __str__(self):
         return f"{self.expr};"
+
+
+class AssignStmt(Stmt):
+    lvalue: 'Expr'
+    rvalue: 'Expr'
+
+    def __init__(self, *, lvalue: 'Expr', rvalue: 'Expr', **kwargs):
+        super(AssignStmt, self).__init__(**kwargs)
+        self.lvalue = lvalue
+        self.rvalue = rvalue
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_assign_stmt(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        self.lvalue.accept(visitor, data)
+        self.rvalue.accept(visitor, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.lvalue = self.lvalue.accept(transformer, data)
+        self.rvalue = self.rvalue.accept(transformer, data)
+
+    def __str__(self):
+        return f"{self.lvalue} = {self.rvalue}"
