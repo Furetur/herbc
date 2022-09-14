@@ -1,6 +1,7 @@
 from typing import Union, List
 
-from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal
+from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
+    StmtBlock
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -105,6 +106,11 @@ class ResolverVisitor(AstWalker):
         self.try_declare(fn)
         self.enter_scope(fn)
         super().walk_node(fn) # we cannot use walk_declaration because it will call the method above
+        self.exit_scope()
+
+    def walk_stmt_block(self, n: 'StmtBlock'):
+        self.enter_scope(n)
+        super().walk_node(n)
         self.exit_scope()
 
     def walk_ident_expr(self, i: 'IdentExpr'):

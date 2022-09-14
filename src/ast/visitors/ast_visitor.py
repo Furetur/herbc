@@ -68,5 +68,8 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_assign_stmt(self, n: 'AssignStmt', data: D) -> R:
         return self.visit_statement(n, data)
 
+    def visit_if_stmt(self, n: 'IfStmt', data: D) -> R:
+        return self.visit_statement(n, data)
+
     def visit_statement(self, n: 'Stmt', data: D) -> R:
         return self.visit_node(n, data)

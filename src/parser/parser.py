@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -56,7 +56,7 @@ class HerbParserVisitor(HerbVisitor):
 
     # ===== EXPRESSIONS =====
 
-    def visitAdditiveBinopExpr(self, ctx:HerbParser.AdditiveBinopExprContext):
+    def visitAdditiveBinopExpr(self, ctx: HerbParser.AdditiveBinopExprContext):
         return BinopExpr(
             left=self.visit(ctx.expr(0)),
             right=self.visit(ctx.expr(1)),
@@ -64,7 +64,7 @@ class HerbParserVisitor(HerbVisitor):
             span=Span.from_antlr(ctx)
         )
 
-    def visitLogicalBinopExpr(self, ctx:HerbParser.LogicalBinopExprContext):
+    def visitLogicalBinopExpr(self, ctx: HerbParser.LogicalBinopExprContext):
         return BinopExpr(
             left=self.visit(ctx.expr(0)),
             right=self.visit(ctx.expr(1)),
@@ -75,12 +75,12 @@ class HerbParserVisitor(HerbVisitor):
     def visitIntLit(self, ctx: HerbParser.IntLitContext):
         return IntLiteral(value=int(ctx.getText()), span=Span.from_antlr(ctx))
 
-    def visitBoolLit(self, ctx:HerbParser.BoolLitContext):
+    def visitBoolLit(self, ctx: HerbParser.BoolLitContext):
         text = ctx.getText()
         assert text in ["true", "false"]
         return BoolLiteral(value=(text == "true"), span=Span.from_antlr(ctx))
 
-    def visitStrLit(self, ctx:HerbParser.StrLitContext):
+    def visitStrLit(self, ctx: HerbParser.StrLitContext):
         text = ctx.getText()[1:-1]
         return StrLiteral(value=text, span=Span.from_antlr(ctx))
 
@@ -98,7 +98,7 @@ class HerbParserVisitor(HerbVisitor):
 
     # ===== STATEMENTS =====
 
-    def visitBlock(self, ctx:HerbParser.BlockContext) -> StmtBlock:
+    def visitBlock(self, ctx: HerbParser.BlockContext) -> StmtBlock:
         statements = []
         i = 0
         while (stmtCtx := ctx.stmt(i)) is not None:
@@ -109,8 +109,30 @@ class HerbParserVisitor(HerbVisitor):
     def visitExprStmt(self, ctx: HerbParser.ExprStmtContext):
         return ExprStmt(expr=self.visit(ctx.expr()), span=Span.from_antlr(ctx))
 
-    def visitAssign(self, ctx:HerbParser.AssignContext):
+    def visitAssign(self, ctx: HerbParser.AssignContext):
         return AssignStmt(lvalue=self.visit(ctx.expr(0)), rvalue=self.visit(ctx.expr(1)), span=Span.from_antlr(ctx))
+
+    def visitIfStmt(self, ctx: HerbParser.IfStmtContext) -> IfStmt:
+        cond_branch = (self.visit(ctx.expr()), self.visit(ctx.thenBlock))
+        if ctx.elseBlock is not None:
+            return IfStmt(
+                condition_branches=[cond_branch],
+                else_branch=self.visit(ctx.elseBlock),
+                span=Span.from_antlr(ctx)
+            )
+        elif ctx.elseIf is not None:
+            else_if: IfStmt = self.visitIfStmt(ctx.elseIf)
+            return IfStmt(
+                condition_branches=[cond_branch] + else_if.condition_branches,
+                else_branch=else_if.else_branch,
+                span=Span.from_antlr(ctx)
+            )
+        else:
+            return IfStmt(
+                condition_branches=[cond_branch],
+                else_branch=None,
+                span=Span.from_antlr(ctx)
+            )
 
     # ===== UTIL =====
 

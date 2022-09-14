@@ -31,10 +31,13 @@ assign
 
 exprStmt: expr ';';
 
+ifStmt: 'if' expr thenBlock=block ( 'else' (elseIf=ifStmt | elseBlock=block) )?;
+
 stmt
     : exprStmt
     | varDecl
     | assign
+    | ifStmt
     ;
 
 expr

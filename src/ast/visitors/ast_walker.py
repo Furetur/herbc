@@ -122,3 +122,9 @@ class AstWalker(AstVisitor[None, None]):
 
     def visit_assign_stmt(self, n: 'AssignStmt', data: None):
         self.walk_assign_stmt(n)
+
+    def walk_if_stmt(self, n: 'IfStmt'):
+        self.walk_statement(n)
+
+    def visit_if_stmt(self, n: 'IfStmt', data: None):
+        self.walk_if_stmt(n)

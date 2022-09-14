@@ -1,6 +1,6 @@
 from typing import cast
 
-from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr
+from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt
 from src.context.compilation_ctx import CompilationCtx
 from src.ty import TyUnknown, TyInt, Ty, TyBool
 
@@ -67,3 +67,8 @@ class TypeCheckVisitor(AstWalker):
         left_ty = n.lvalue.ty
         assert left_ty != TyUnknown, "All types must be known by this point"
         self.require_type(n.rvalue, left_ty, f"The type of the variable {n.lvalue} is '{left_ty}'")
+
+    def walk_if_stmt(self, n: 'IfStmt'):
+        super().walk_if_stmt(n)
+        for cond, _ in n.condition_branches:
+            self.require_type(cond, TyBool, "If conditions must be of type 'bool'")
