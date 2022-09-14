@@ -104,7 +104,7 @@ class ResolverVisitor(AstWalker):
     def walk_fun_decl(self, fn: 'FunDecl'):
         self.try_declare(fn)
         self.enter_scope(fn)
-        super().walk_declaration(fn)
+        super().walk_node(fn) # i cannot use walk_declaration because it will call the method above
         self.exit_scope()
 
     def walk_ident_expr(self, i: 'IdentExpr'):

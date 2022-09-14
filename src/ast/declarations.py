@@ -53,9 +53,9 @@ class Import(Decl):
 
 class FunDecl(Decl, Scope):
     name: str
-    body: List['Node']
+    body: 'StmtSeq'
 
-    def __init__(self, *, name: str, body: List['Node'], **kwargs):
+    def __init__(self, *, name: str, body: 'StmtSeq', **kwargs):
         Decl.__init__(self, **kwargs)
         Scope.__init__(self)
         self.name = name
@@ -65,19 +65,16 @@ class FunDecl(Decl, Scope):
         return visitor.visit_fun_decl(self, data)
 
     def accept_children(self, visitor: AstVisitor[D, R], data: D):
-        for n in self.body:
-            n.accept(visitor, data)
+        self.body.accept(visitor, data)
 
     def transform_children(self, transformer: AstTransformer[D], data: D):
-        for i in range(len(self.body)):
-            self.body[i] = self.body[i].accept(transformer, data)
+        self.body = self.body.accept(transformer, data)
 
     def declared_name(self) -> str:
         return self.name
 
     def __str__(self):
-        body = "\n".join(str(n) for n in self.body)
-        return f"fn {self.name} () {{{body}}}"
+        return f"fn {self.name} () {self.body}"
 
 
 class VarDecl(Decl):

@@ -1,8 +1,28 @@
 from src.ast.base import Stmt
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
+
 if TYPE_CHECKING:
     from src.ast import Expr, AstVisitor, D, R, AstTransformer
+
+
+class StmtSeq(Stmt):
+    stmts: 'List[Stmt]'
+
+    def __init__(self, *, stmts: 'List[Stmt]', **kwargs):
+        super().__init__(**kwargs)
+        self.stmts = stmts
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_stmt_seq(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        for stmt in self.stmts:
+            stmt.accept(visitor, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        for i in range(len(self.stmts)):
+            self.stmts[i] = self.stmts[i].accept(transformer, data)
 
 
 class ExprStmt(Stmt):

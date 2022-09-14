@@ -84,10 +84,7 @@ class GenVisitor(AstVisitor):
         assert fn.name == "main"
         f = ir.Function(self.module, main_fn_type, name=MAIN_FN_NAME)
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
-
-        for stmt in fn.body:
-            stmt.accept(self, None)
-
+        fn.body.accept(self, None)
         self.builder.ret(ir.Constant(int_type, 0))
 
     def visit_var_decl(self, n: 'VarDecl', data):

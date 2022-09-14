@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtSeq
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -41,12 +41,11 @@ class HerbParserVisitor(HerbVisitor):
         return Import(alias="", path=path, is_relative=is_relative, span=Span.from_antlr(ctx))
 
     def visitFuncDecl(self, ctx: HerbParser.FuncDeclContext):
-        statements = []
-        i = 0
-        while (stmtCtx := ctx.stmt(i)) is not None:
-            i += 1
-            statements.append(self.visit(stmtCtx))
-        return FunDecl(name=str(ctx.IDENT()), body=statements, span=Span.from_antlr(ctx))
+        return FunDecl(
+            name=str(ctx.IDENT()),
+            body=self.visitBlock(ctx.block()),
+            span=Span.from_antlr(ctx)
+        )
 
     def visitVarDecl(self, ctx: HerbParser.VarDeclContext):
         return VarDecl(
@@ -98,6 +97,14 @@ class HerbParserVisitor(HerbVisitor):
         return IdentExpr(name=str(ctx.IDENT()), span=Span.from_antlr(ctx))
 
     # ===== STATEMENTS =====
+
+    def visitBlock(self, ctx:HerbParser.BlockContext) -> StmtSeq:
+        statements = []
+        i = 0
+        while (stmtCtx := ctx.stmt(i)) is not None:
+            i += 1
+            statements.append(self.visit(stmtCtx))
+        return StmtSeq(stmts=statements, span=Span.from_antlr(ctx))
 
     def visitExprStmt(self, ctx: HerbParser.ExprStmtContext):
         return ExprStmt(expr=self.visit(ctx.expr()), span=Span.from_antlr(ctx))

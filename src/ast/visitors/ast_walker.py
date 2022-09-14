@@ -105,6 +105,12 @@ class AstWalker(AstVisitor[None, None]):
     def visit_statement(self, n: 'Stmt', data: None):
         self.walk_statement(n)
 
+    def walk_stmt_seq(self, n: 'StmtSeq'):
+        self.walk_node(n)
+
+    def visit_stmt_seq(self, n: 'StmtSeq', data: 'D'):
+        self.walk_stmt_seq(n)
+
     def walk_expr_stmt(self, n: 'ExprStmt'):
         self.walk_statement(n)
 

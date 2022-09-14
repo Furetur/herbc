@@ -18,7 +18,7 @@ importPath
     ;
 
 funcDecl
-    : 'fn' IDENT '(' ')' '{' stmt* '}'
+    : 'fn' IDENT '(' ')' block
     ;
 
 varDecl
@@ -48,6 +48,7 @@ expr
     ;
 
 commaSeparatedExprs: expr (',' expr)*;
+block: '{' stmt* '}';
 
 STRINGLITERAL: '"' ~["\\\r\n]* '"';
 BOOL_LITERAL: 'true' | 'false';
