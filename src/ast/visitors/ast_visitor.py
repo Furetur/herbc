@@ -59,7 +59,7 @@ class AstVisitor(Generic[D, R], ABC):
 
     # statements
 
-    def visit_stmt_seq(self, n: 'StmtSeq', data: D) -> R:
+    def visit_stmt_block(self, n: 'StmtBlock', data: D) -> R:
         return self.visit_statement(n, data)
 
     def visit_expr_stmt(self, n: 'ExprStmt', data: D) -> R:

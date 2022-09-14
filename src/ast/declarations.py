@@ -53,9 +53,9 @@ class Import(Decl):
 
 class FunDecl(Decl, Scope):
     name: str
-    body: 'StmtSeq'
+    body: 'StmtBlock'
 
-    def __init__(self, *, name: str, body: 'StmtSeq', **kwargs):
+    def __init__(self, *, name: str, body: 'StmtBlock', **kwargs):
         Decl.__init__(self, **kwargs)
         Scope.__init__(self)
         self.name = name

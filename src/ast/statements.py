@@ -1,12 +1,13 @@
 from src.ast.base import Stmt
 
 from typing import TYPE_CHECKING, List
+from src.ast import Scope
 
 if TYPE_CHECKING:
     from src.ast import Expr, AstVisitor, D, R, AstTransformer
 
 
-class StmtSeq(Stmt):
+class StmtBlock(Stmt, Scope):
     stmts: 'List[Stmt]'
 
     def __init__(self, *, stmts: 'List[Stmt]', **kwargs):
@@ -14,7 +15,7 @@ class StmtSeq(Stmt):
         self.stmts = stmts
 
     def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
-        return visitor.visit_stmt_seq(self, data)
+        return visitor.visit_stmt_block(self, data)
 
     def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
         for stmt in self.stmts:
