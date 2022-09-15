@@ -1,0 +1,7 @@
+fn main() {
+    if false {
+        print("yes");
+    } else {
+        print("no");
+    }
+}

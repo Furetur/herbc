@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt, BinopKind
+    Print, IdentExpr, AssignStmt, BinopKind, IfStmt
 from src.ast.utils import is_top_level
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -15,6 +15,7 @@ class GenVisitor(AstVisitor):
 
     # generation
     module: ir.Module
+    f: ir.Function | None
     builder: ir.IRBuilder | None
 
     header: Dict[str, ir.GlobalValue]
@@ -83,6 +84,7 @@ class GenVisitor(AstVisitor):
     def visit_fun_decl(self, fn: 'FunDecl', data):
         assert fn.name == "main"
         f = ir.Function(self.module, main_fn_type, name=MAIN_FN_NAME)
+        self.f = f
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
         fn.body.accept(self, None)
         self.builder.ret(ir.Constant(int_type, 0))
@@ -108,6 +110,30 @@ class GenVisitor(AstVisitor):
         ptr = self.gen_ptr_to_decl(n.lvalue.decl)
         value = n.rvalue.accept(self, None)
         self.builder.store(value, ptr)
+
+    def visit_if_stmt(self, n: 'IfStmt', data):
+        # the basic block after the if statement
+        after = self.builder.append_basic_block()
+
+        for cond, block in n.condition_branches:
+            then = self.builder.append_basic_block()
+            els = self.builder.append_basic_block()
+            # finish the current basic block
+            self.builder.cbranch(self.visit(cond, None), then, els)
+            # generate 'then'
+            self.builder = ir.IRBuilder(then)
+            self.visit(block, None)
+            self.builder.branch(after) # IMPORTANT: jump to 'after'
+            # switch to generating 'else'
+            # the next if condition should be generated inside this else basic block
+            self.builder = ir.IRBuilder(els)
+        # generate 'else' branch
+        # self.builder already points to the final else branch
+        # if there's no else branch we generate empty else block that jumps to 'before'
+        if n.else_branch is not None:
+            self.visit(n.else_branch, None)
+        self.builder.branch(after) # IMPORTANT: jump to 'after'
+        self.builder = ir.IRBuilder(after)
 
 
     # Expressions

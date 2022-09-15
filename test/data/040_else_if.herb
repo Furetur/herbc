@@ -1,0 +1,23 @@
+fn main() {
+    var i = 100;
+
+    if i < 10 {
+        print("less than 10");
+    } else if i < 30 {
+        print("less than 30");
+    } else if i < 50 {
+        print("less than 50");
+    } else {
+        if i < 80 {
+            print("less than 80");
+        } else {
+            if i < 100 {
+                print("less than 100");
+            } else if i < 101 {
+                print("exactly 100");
+            } else {
+                print("?");
+            }
+        }
+    }
+}

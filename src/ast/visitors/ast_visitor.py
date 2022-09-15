@@ -10,6 +10,10 @@ R = TypeVar("R")
 
 
 class AstVisitor(Generic[D, R], ABC):
+
+    def visit(self, n: 'Node', data: D) -> R:
+        return n.accept(self, data)
+
     @abstractmethod
     def visit_node(self, n: 'Node', data: D) -> R: ...
 
