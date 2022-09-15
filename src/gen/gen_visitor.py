@@ -2,8 +2,8 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt, BinopKind, IfStmt
-from src.ast.utils import is_top_level
+    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt
+from src.ast.utils import is_top_level, find_descendants_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
 from src.ty import TyInt, TyBool, TyStr
@@ -23,7 +23,7 @@ class GenVisitor(AstVisitor):
     global_id: int = 0
     globals: Dict[str, ir.GlobalVariable]
 
-    locals: Dict[Decl, ir.Value] # map[local var decl, stack alloca]
+    locals: Dict[Decl, ir.AllocaInstr] # map[local var decl, stack alloca]
 
     def __init__(self, ctx: CompilationCtx, mod: Module):
         self.ctx = ctx
@@ -73,6 +73,12 @@ class GenVisitor(AstVisitor):
             assert decl in self.locals, "Local variable was not generated"
             return self.locals[decl]
 
+    def stack_alloc_if_needed(self, n: 'VarDecl') -> ir.AllocaInstr:
+        if n in self.locals:
+            return self.locals[n]
+        alloca = self.builder.alloca(ll_type(n.ty))
+        self.locals[n] = alloca
+        return alloca
 
     # Visitor
 
@@ -98,10 +104,9 @@ class GenVisitor(AstVisitor):
             self.globals[name] = glob
         else:
             # local variable
-            alloca = self.builder.alloca(ll_type(n.ty))
+            alloca = self.stack_alloc_if_needed(n)
             initializer = n.initializer.accept(self, None)
             self.builder.store(initializer, alloca)
-            self.locals[n] = alloca
 
     # Statements
 
@@ -135,6 +140,25 @@ class GenVisitor(AstVisitor):
         self.builder.branch(after) # IMPORTANT: jump to 'after'
         self.builder = ir.IRBuilder(after)
 
+    def visit_while_stmt(self, n: 'WhileStmt', data):
+        for var in find_descendants_of_type(n, VarDecl):
+            self.stack_alloc_if_needed(var)
+        # generate while
+        cond_block = self.builder.append_basic_block()
+        body_block = self.builder.append_basic_block()
+        after_block = self.builder.append_basic_block()
+
+        self.builder.branch(cond_block) # finish current block
+        # condition block
+        self.builder = ir.IRBuilder(cond_block)
+        cond: ir.Value = self.visit(n.cond, None)
+        self.builder.cbranch(cond, body_block, after_block)
+        # body block
+        self.builder = ir.IRBuilder(body_block)
+        self.visit(n.body, None)
+        self.builder.branch(cond_block)
+        # after block
+        self.builder = ir.IRBuilder(after_block)
 
     # Expressions
 

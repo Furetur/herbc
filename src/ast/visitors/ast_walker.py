@@ -128,3 +128,9 @@ class AstWalker(AstVisitor[None, None]):
 
     def visit_if_stmt(self, n: 'IfStmt', data: None):
         self.walk_if_stmt(n)
+
+    def walk_while_stmt(self, n: 'WhileStmt'):
+        self.walk_statement(n)
+
+    def visit_while_stmt(self, n: 'WhileStmt', data: 'D'):
+        self.walk_while_stmt(n)

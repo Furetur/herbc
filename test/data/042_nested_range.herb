@@ -1,0 +1,16 @@
+fn main() {
+    var i = 1;
+    while i < 10 {
+        print(i);
+        print(": ");
+
+        var j = 1;
+        while j < 5 {
+            print(i + j);
+            print(" ");
+            j = j + 1;
+        }
+        print(", ");
+        i = i + 1;
+    }
+}

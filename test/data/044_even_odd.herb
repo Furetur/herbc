@@ -1,0 +1,18 @@
+fn main() {
+    var even = true;
+    var i = 0;
+
+    while i < 10 {
+        print(i);
+        print(": ");
+        if even {
+            print("even");
+            even = false;
+        } else {
+            print("odd");
+            even = true;
+        }
+        print(", ");
+        i = i + 1;
+    }
+}

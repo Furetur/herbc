@@ -57,7 +57,6 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_ident_expr(self, n: 'IdentExpr', data: D) -> R:
         return self.visit_expression(n, data)
 
-
     def visit_print(self, n: 'Print', data: D) -> R:
         return self.visit_expression(n, data)
 
@@ -73,6 +72,9 @@ class AstVisitor(Generic[D, R], ABC):
         return self.visit_statement(n, data)
 
     def visit_if_stmt(self, n: 'IfStmt', data: D) -> R:
+        return self.visit_statement(n, data)
+
+    def visit_while_stmt(self, n: 'WhileStmt', data: D) -> R:
         return self.visit_statement(n, data)
 
     def visit_statement(self, n: 'Stmt', data: D) -> R:

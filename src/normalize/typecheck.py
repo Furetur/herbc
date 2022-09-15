@@ -1,6 +1,6 @@
 from typing import cast
 
-from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt
+from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt
 from src.context.compilation_ctx import CompilationCtx
 from src.ty import TyUnknown, TyInt, Ty, TyBool
 
@@ -72,3 +72,7 @@ class TypeCheckVisitor(AstWalker):
         super().walk_if_stmt(n)
         for cond, _ in n.condition_branches:
             self.require_type(cond, TyBool, "If conditions must be of type 'bool'")
+
+    def walk_while_stmt(self, n: 'WhileStmt'):
+        super().walk_while_stmt(n)
+        self.require_type(n.cond, TyBool, "While conditions must be of type 'bool'")

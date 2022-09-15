@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, List
 
-from src.ast import Scope
+from src.ast import Scope, AstWalker
 
 if TYPE_CHECKING:
     from src.ast.base import Node
@@ -33,3 +33,22 @@ def outerscope(n: 'Node') -> Union[Scope, None]:
         return n.parent
     else:
         return outerscope(n.parent)
+
+
+def find_descendants_of_type(n: 'Node', typ):
+    walker = FindDescendantsWalker(typ)
+    walker.walk(n)
+    return walker.result
+
+
+class FindDescendantsWalker(AstWalker):
+    result: List['Node']
+
+    def __init__(self, typ):
+        self.result = list()
+        self.typ = typ
+
+    def walk_node(self, n: 'Node'):
+        if isinstance(n, self.typ):
+            self.result.append(n)
+        super().walk_node(n)

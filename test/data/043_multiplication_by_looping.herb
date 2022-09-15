@@ -1,0 +1,10 @@
+fn main() {
+    var result = 0;
+
+    var i = 0;
+    while i < 36 {
+        result = result + 6;
+        i = i + 1;
+    }
+    print(result);
+}

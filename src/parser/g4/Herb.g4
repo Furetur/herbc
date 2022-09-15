@@ -33,11 +33,14 @@ exprStmt: expr ';';
 
 ifStmt: 'if' expr thenBlock=block ( 'else' (elseIf=ifStmt | elseBlock=block) )?;
 
+whileStmt: 'while' expr block;
+
 stmt
     : exprStmt
     | varDecl
     | assign
     | ifStmt
+    | whileStmt
     ;
 
 expr
@@ -55,6 +58,6 @@ block: '{' stmt* '}';
 
 STRINGLITERAL: '"' ~["\\\r\n]* '"';
 BOOL_LITERAL: 'true' | 'false';
-INT_LITERAL: [1-9][0-9]*;
+INT_LITERAL: [0-9]+;
 IDENT: [a-zA-Z_]+[a-zA-Z_0-9]*;
 WS: [ \n\t\r]+ -> skip;

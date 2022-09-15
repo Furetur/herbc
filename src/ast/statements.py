@@ -113,3 +113,23 @@ class IfStmt(Stmt):
             result += f"else if {cond} {block}"
         return f"if {self.condition_branches[0]}"
 
+
+class WhileStmt(Stmt):
+    cond: 'Expr'
+    body: 'StmtBlock'
+
+    def __init__(self, *, cond: 'Expr', body: 'StmtBlock', **kwargs):
+        super(WhileStmt, self).__init__(**kwargs)
+        self.cond = cond
+        self.body = body
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_while_stmt(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        visitor.visit(self.cond, data)
+        visitor.visit(self.body, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.cond = transformer.visit(self.cond, data)
+        self.body = transformer.visit(self.body, data)

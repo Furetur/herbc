@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -133,6 +133,13 @@ class HerbParserVisitor(HerbVisitor):
                 else_branch=None,
                 span=Span.from_antlr(ctx)
             )
+
+    def visitWhileStmt(self, ctx:HerbParser.WhileStmtContext):
+        return WhileStmt(
+            cond=self.visit(ctx.expr()),
+            body=self.visit(ctx.block()),
+            span=Span.from_antlr(ctx)
+        )
 
     # ===== UTIL =====
 
