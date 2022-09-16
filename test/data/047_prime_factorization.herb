@@ -1,0 +1,14 @@
+fn main() {
+    var n = 12538 * 144;
+
+    var div = 2;
+    while div <= n {
+        while n % div == 0 {
+            print(div);
+            print(",");
+            n = n / div;
+        }
+
+        div = div + 1;
+    }
+}

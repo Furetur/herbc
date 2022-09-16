@@ -12,7 +12,7 @@ fn main() {
             print("odd");
             even = true;
         }
-        print(", ");
+        print(",");
         i = i + 1;
     }
 }

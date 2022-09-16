@@ -44,13 +44,18 @@ stmt
     ;
 
 expr
-    : expr '+' expr # additiveBinopExpr
-    | expr '<' expr # logicalBinopExpr
-    | INT_LITERAL # intLit
-    | BOOL_LITERAL # boolLit
-    | STRINGLITERAL # strLit
-    | IDENT '(' commaSeparatedExprs? ')' # funCall
-    | IDENT # reference
+    : INT_LITERAL #intLit
+    | BOOL_LITERAL #boolLit
+    | STRINGLITERAL #strLit
+    | IDENT #reference
+    | '(' expr ')' #parenExpr
+    | IDENT '(' commaSeparatedExprs? ')' #funCall
+    | op=('-' | '!') expr #unaryopExpr
+    | expr op=('*' | '/' | '%' | '&') expr #binopExpr
+    | expr op=('+' | '-' | '|') expr #binopExpr
+    | expr op=('<' | '<=' | '==' | '!=' | '>' | '>=' ) expr #binopExpr
+    | expr op='&&' expr #binopExpr
+    | expr op='||' expr #binopExpr
     ;
 
 commaSeparatedExprs: expr (',' expr)*;

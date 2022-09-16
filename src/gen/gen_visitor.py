@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt
+    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind
 from src.ast.utils import is_top_level, find_descendants_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -167,8 +167,29 @@ class GenVisitor(AstVisitor):
         right = n.right.accept(self, None)
         if n.kind == BinopKind.PLUS:
             return self.builder.add(left, right)
-        elif n.kind == BinopKind.LESS:
-            return self.builder.icmp_signed('<', left, right)
+        elif n.kind == BinopKind.MUL:
+            return self.builder.mul(left, right)
+        elif n.kind == BinopKind.DIV:
+            return self.builder.sdiv(left, right)
+        elif n.kind == BinopKind.MINUS:
+            return self.builder.sub(left, right)
+        elif n.kind in [BinopKind.BITWISE_AND, BinopKind.LOGICAL_AND]:
+            return self.builder.and_(left, right)
+        elif n.kind in [BinopKind.BITWISE_OR, BinopKind.LOGICAL_OR]:
+            return self.builder.or_(left, right)
+        elif n.kind in [BinopKind.LT, BinopKind.LTE, BinopKind.EQ, BinopKind.NEQ, BinopKind.GT, BinopKind.GTE]:
+            return self.builder.icmp_signed(n.kind.value, left, right)
+        elif n.kind == BinopKind.MOD:
+            return self.builder.srem(left, right)
+        else:
+            assert False
+
+    def visit_unop(self, n: 'UnopExpr', data) -> ir.Value:
+        expr = n.expr.accept(self, None)
+        if n.kind == UnopKind.MINUS:
+            return self.builder.neg(expr)
+        elif n.kind == UnopKind.BANG:
+            return self.builder.not_(expr)
         else:
             assert False
 

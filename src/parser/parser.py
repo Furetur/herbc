@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
@@ -56,19 +56,21 @@ class HerbParserVisitor(HerbVisitor):
 
     # ===== EXPRESSIONS =====
 
-    def visitAdditiveBinopExpr(self, ctx: HerbParser.AdditiveBinopExprContext):
+    def visitParenExpr(self, ctx:HerbParser.ParenExprContext):
+        return self.visit(ctx.expr())
+
+    def visitBinopExpr(self, ctx:HerbParser.BinopExprContext):
         return BinopExpr(
             left=self.visit(ctx.expr(0)),
             right=self.visit(ctx.expr(1)),
-            kind=BinopKind.PLUS,
+            kind=BinopKind(ctx.op.text),
             span=Span.from_antlr(ctx)
         )
 
-    def visitLogicalBinopExpr(self, ctx: HerbParser.LogicalBinopExprContext):
-        return BinopExpr(
-            left=self.visit(ctx.expr(0)),
-            right=self.visit(ctx.expr(1)),
-            kind=BinopKind.LESS,
+    def visitUnaryopExpr(self, ctx:HerbParser.UnaryopExprContext):
+        return UnopExpr(
+            expr=self.visit(ctx.expr()),
+            kind=UnopKind(ctx.op.text),
             span=Span.from_antlr(ctx)
         )
 

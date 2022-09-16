@@ -58,7 +58,23 @@ class IdentExpr(Expr):
 
 class BinopKind(Enum):
     PLUS = '+'
-    LESS = '<'
+    MUL = '*'
+    DIV = '/'
+    MINUS = '-'
+    MOD = '%'
+
+    BITWISE_AND = '&'
+    BITWISE_OR = '|'
+
+    LT = '<'
+    LTE = '<='
+    EQ = '=='
+    NEQ = '!='
+    GT = '>'
+    GTE = '>='
+
+    LOGICAL_AND = '&&'
+    LOGICAL_OR = '||'
 
 
 class BinopExpr(Expr):
@@ -85,3 +101,30 @@ class BinopExpr(Expr):
 
     def __str__(self):
         return f"{self.left} {self.kind.value} {self.right}"
+
+
+class UnopKind(Enum):
+    MINUS = '-'
+    BANG = '!'
+
+
+class UnopExpr(Expr):
+    kind: UnopKind
+    expr: 'Expr'
+
+    def __init__(self, *, kind: 'UnopKind', expr: 'Expr', **kwargs):
+        super(UnopExpr, self).__init__(**kwargs)
+        self.kind = kind
+        self.expr = expr
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_unop(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        visitor.visit(self.expr, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.expr = transformer.visit(self.expr, data)
+
+    def __str__(self):
+        return f"{self.kind.value}{self.expr}"

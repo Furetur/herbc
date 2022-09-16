@@ -1,6 +1,7 @@
 from typing import cast
 
-from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt
+from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
+    UnopKind, UnopExpr
 from src.context.compilation_ctx import CompilationCtx
 from src.ty import TyUnknown, TyInt, Ty, TyBool
 
@@ -8,6 +9,33 @@ from src.ty import TyUnknown, TyInt, Ty, TyBool
 def typecheck(ctx: CompilationCtx, mod: Module):
     v = TypeCheckVisitor(ctx)
     v.walk(mod)
+
+
+# (operand_type, result_type)
+binop_types = {
+    BinopKind.PLUS: (TyInt, TyInt),
+    BinopKind.MINUS: (TyInt, TyInt),
+    BinopKind.MUL: (TyInt, TyInt),
+    BinopKind.DIV: (TyInt, TyInt),
+    BinopKind.MOD: (TyInt, TyInt),
+    BinopKind.BITWISE_OR: (TyInt, TyInt),
+    BinopKind.BITWISE_AND: (TyInt, TyInt),
+
+    BinopKind.LT: (TyInt, TyBool),
+    BinopKind.LTE: (TyInt, TyBool),
+    BinopKind.EQ: (TyInt, TyBool),
+    BinopKind.NEQ: (TyInt, TyBool),
+    BinopKind.GT: (TyInt, TyBool),
+    BinopKind.GTE: (TyInt, TyBool),
+    BinopKind.LOGICAL_AND: (TyBool, TyBool),
+    BinopKind.LOGICAL_OR: (TyBool, TyBool),
+}
+
+# (operand_type, result_type)
+unop_types = {
+    UnopKind.MINUS: (TyInt, TyInt),
+    UnopKind.BANG: (TyBool, TyBool)
+}
 
 
 class TypeCheckVisitor(AstWalker):
@@ -41,16 +69,20 @@ class TypeCheckVisitor(AstWalker):
 
     def walk_binop(self, n: 'BinopExpr'):
         super(TypeCheckVisitor, self).walk_binop(n)
-        hint = f"Binary '{n.kind.value}' operator is only supported for integer types"
-        self.require_type(n.left, TyInt, hint)
-        self.require_type(n.right, TyInt, hint)
+        assert n.kind in binop_types
+        operand_ty, result_ty = binop_types[n.kind]
+        hint = f"Binary '{n.kind.value}' operator is only supported for '{operand_ty}' types"
+        self.require_type(n.left, operand_ty, hint)
+        self.require_type(n.right, operand_ty, hint)
+        n.ty = result_ty
 
-        if n.kind == BinopKind.PLUS:
-            n.ty = TyInt
-        elif n.kind == BinopKind.LESS:
-            n.ty = TyBool
-        else:
-            assert False, "unknown binop kind"
+    def walk_unop(self, n: 'UnopExpr'):
+        super().walk_unop(n)
+        assert n.kind in unop_types
+        operand_ty, result_ty = unop_types[n.kind]
+        hint = f"Unary '{n.kind.value}' operator is supported only for '{operand_ty}' types"
+        self.require_type(n.expr, operand_ty, hint)
+        n.ty = result_ty
 
     def walk_assign_stmt(self, n: 'AssignStmt'):
         # calculate types and check lvalue

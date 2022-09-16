@@ -42,6 +42,9 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_binop(self, n: 'BinopExpr', data: D) -> R:
         return self.visit_expression(n, data)
 
+    def visit_unop(self, n: 'UnopExpr', data: D) -> R:
+        return self.visit_expression(n, data)
+
     def visit_int_literal(self, n: 'IntLiteral', data: D) -> R:
         return self.visit_expression(n, data)
 
