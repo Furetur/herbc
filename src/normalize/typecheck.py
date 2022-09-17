@@ -1,9 +1,9 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall
+    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt
 from src.context.compilation_ctx import CompilationCtx
-from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc
+from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
@@ -74,6 +74,12 @@ class TypeCheckVisitor(AstWalker):
         assert i.decl is not None
         assert isinstance(i.decl, RValueDecl)
         i.ty = cast(RValueDecl, i.decl).value_ty()
+        if i.ty == TyBuiltin:
+            self.ctx.add_error_to_node(
+                node=i,
+                message="Cannot use a builtin as a value",
+                hint="You can only call a builtin, you cannot store it anywhere"
+            )
 
     def walk_binop(self, n: 'BinopExpr'):
         super(TypeCheckVisitor, self).walk_binop(n)
@@ -110,6 +116,11 @@ class TypeCheckVisitor(AstWalker):
             for formal_arg, arg in zip(n.callee.ty.args, n.args):
                 self.require_type(arg, formal_arg, hint="Invalid argument type")
             n.ty = n.callee.ty.ret
+        if n.ty == TyVoid and not isinstance(n.parent, ExprStmt):
+            self.ctx.add_error_to_node(
+                node=n,
+                message="This call returns 'void', it cannot be used as a value"
+            )
 
     def walk_assign_stmt(self, n: 'AssignStmt'):
         # calculate types and check lvalue

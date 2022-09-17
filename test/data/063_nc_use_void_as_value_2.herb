@@ -1,0 +1,5 @@
+fn f() -> void {}
+
+fn main() {
+    var a = f();
+}
