@@ -18,12 +18,14 @@ importPath
     ;
 
 funcDecl
-    : 'fn' IDENT '(' ')' block
+    : 'fn' IDENT '(' ( argDecl (',' argDecl)* )? ')' ('->' retTyp=typ)? block
     ;
 
 varDecl
     : 'var' IDENT '=' expr ';'
     ;
+
+argDecl: IDENT ':' typ;
 
 assign
     : expr '=' expr ';'
@@ -58,8 +60,15 @@ expr
     | expr op='||' expr #binopExpr
     ;
 
+typ
+    : IDENT #typLit
+    | '(' ( typ (',' typ)* )? ')' '->' typ #typFunc
+    ;
+
+
 commaSeparatedExprs: expr (',' expr)*;
 block: '{' stmt* '}';
+
 
 STRINGLITERAL: '"' ~["\\\r\n]* '"';
 BOOL_LITERAL: 'true' | 'false';

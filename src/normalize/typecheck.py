@@ -1,9 +1,9 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr
+    UnopKind, UnopExpr, RValueDecl, ArgDecl
 from src.context.compilation_ctx import CompilationCtx
-from src.ty import TyUnknown, TyInt, Ty, TyBool
+from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
@@ -58,14 +58,22 @@ class TypeCheckVisitor(AstWalker):
 
     # Walker
 
+    def walk_arg_decl(self, n: 'ArgDecl'):
+        if n.value_ty() == TyVoid:
+            self.ctx.add_error_to_node(
+                node=n,
+                message=f"Cannot use 'void' as a formal argument type",
+                hint="void can only be used as the return type"
+            )
+
     def walk_var_decl(self, v: 'VarDecl'):
         v.initializer.accept(self, None)
         v.ty = v.initializer.ty
 
     def walk_ident_expr(self, i: 'IdentExpr'):
         assert i.decl is not None
-        assert type(i.decl) is VarDecl
-        i.ty = cast(VarDecl, i.decl).ty
+        assert isinstance(i.decl, RValueDecl)
+        i.ty = cast(RValueDecl, i.decl).value_ty()
 
     def walk_binop(self, n: 'BinopExpr'):
         super(TypeCheckVisitor, self).walk_binop(n)

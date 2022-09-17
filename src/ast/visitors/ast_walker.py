@@ -47,6 +47,12 @@ class AstWalker(AstVisitor[None, None]):
     def visit_var_decl(self, n: 'VarDecl', data: None):
         self.walk_var_decl(n)
 
+    def walk_arg_decl(self, n: 'ArgDecl'):
+        self.walk_declaration(n)
+
+    def visit_arg_decl(self, n: 'ArgDecl', data: None):
+        self.walk_arg_decl(n)
+
     # expressions
 
     def walk_expression(self, n: 'Expr'):

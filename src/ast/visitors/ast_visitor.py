@@ -34,6 +34,9 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_var_decl(self, n: 'VarDecl', data: D) -> R:
         return self.visit_declaration(n, data)
 
+    def visit_arg_decl(self, n: 'ArgDecl', data: D) -> R:
+        return self.visit_declaration(n, data)
+
     # expressions
 
     def visit_expression(self, n: 'Expr', data: D) -> R:

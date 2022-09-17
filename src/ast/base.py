@@ -59,3 +59,8 @@ class Stmt(Node, ABC):
 class Decl(Stmt, ABC):
     @abstractmethod
     def declared_name(self) -> str: ...
+
+
+class RValueDecl(Decl, ABC):
+    @abstractmethod
+    def value_ty(self) -> Ty: ...

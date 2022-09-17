@@ -2,16 +2,28 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind, ArgDecl
+from src.context.compilation_ctx import CompilationCtx
+from src.context.error_ctx import CompilationError
 from src.span import Span, INVALID_SPAN
 from src.parser.generated.HerbParser import HerbParser
 from src.parser.generated.HerbVisitor import HerbVisitor
-from src.ty import TyInt, TyUnknown, TyBool
+from src.ty import TyInt, TyUnknown, TyBool, ty_primitive_by_name, Ty, TyFunc, TyVoid
+
+
+def get_all(get, start_i=0):
+    result = []
+    i = start_i
+    while (ctx := get(i)) is not None:
+        i += 1
+        result.append(ctx)
+    return result
 
 
 class HerbParserVisitor(HerbVisitor):
-    def __init__(self, filepath: Path):
+    def __init__(self, filepath: Path, compiler: CompilationCtx):
         self.filepath = filepath
+        self.compiler = compiler
 
     def visitProg(self, ctx: HerbParser.ProgContext) -> Module:
         # imports
@@ -43,7 +55,16 @@ class HerbParserVisitor(HerbVisitor):
     def visitFuncDecl(self, ctx: HerbParser.FuncDeclContext):
         return FunDecl(
             name=str(ctx.IDENT()),
+            args=[self.visit(arg) for arg in get_all(lambda i: ctx.argDecl(i))],
             body=self.visitBlock(ctx.block()),
+            ret_ty=self.visit(ctx.typ()) if ctx.typ() is not None else TyVoid,
+            span=Span.from_antlr(ctx)
+        )
+
+    def visitArgDecl(self, ctx:HerbParser.ArgDeclContext):
+        return ArgDecl(
+            name=str(ctx.IDENT()),
+            ty=self.visit(ctx.typ()),
             span=Span.from_antlr(ctx)
         )
 
@@ -142,6 +163,26 @@ class HerbParserVisitor(HerbVisitor):
             body=self.visit(ctx.block()),
             span=Span.from_antlr(ctx)
         )
+
+    # ===== TYPES =====
+
+    def visitTypLit(self, ctx:HerbParser.TypLitContext) -> 'Ty':
+        text = ctx.getText()
+        if text in ty_primitive_by_name:
+            return ty_primitive_by_name[text]
+        else:
+            allowed_types = ', '.join(str(ty) for ty in ty_primitive_by_name.values())
+            self.compiler.add_error(CompilationError(
+                filepath=self.filepath,
+                message=f"Unknown type '{text}'",
+                hint=f"Allowed types: {allowed_types}.",
+                span=Span.from_antlr(ctx)
+            ))
+
+    def visitTypFunc(self, ctx:HerbParser.TypFuncContext):
+        types = [self.visit(ty) for ty in get_all(lambda i: ctx.typ(i))]
+        assert len(types) > 1
+        return TyFunc(args=types[:-1], ret=types[-1])
 
     # ===== UTIL =====
 

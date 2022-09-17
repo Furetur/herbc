@@ -1,0 +1,6 @@
+
+fn f(x: void, y: int) -> bool {
+}
+
+fn main() {
+}

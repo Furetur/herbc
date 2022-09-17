@@ -27,6 +27,6 @@ def parse(compiler: CompilationCtx, path: Path) -> Module:
     tree = parser.prog()
     if error_listener.has_errors:
         raise CompilationInterrupted()
-    mod = tree.accept(HerbParserVisitor(path))
+    mod = tree.accept(HerbParserVisitor(path, compiler))
     set_parents(mod)
     return mod

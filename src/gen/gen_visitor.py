@@ -88,8 +88,9 @@ class GenVisitor(AstVisitor):
     # Declarations
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
-        assert fn.name == "main"
-        f = ir.Function(self.module, main_fn_type, name=MAIN_FN_NAME)
+        if fn.name != USER_MAIN_FN_NAME:
+            return
+        f = ir.Function(self.module, main_fn_type, name=OUT_MAIN_FN_NAME)
         self.f = f
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
         fn.body.accept(self, None)

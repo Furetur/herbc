@@ -1,4 +1,4 @@
-fn main() {
+fn main() -> void {
     var n = 12538 * 144;
 
     var div = 2;

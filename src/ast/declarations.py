@@ -5,10 +5,11 @@ if TYPE_CHECKING:
     from src.ast import Node, Module
     from src.ast.visitors import D, R
 
-from src.ty import Ty, TyUnknown
+from src.ty import *
 from src.ast.visitors import *
-from src.ast.base import Decl
+from src.ast.base import Decl, RValueDecl
 from src.ast.scope import Scope
+
 
 class Import(Decl):
     alias: str
@@ -51,33 +52,73 @@ class Import(Decl):
         return f"import {self.declared_name()} = {self.import_path()};"
 
 
-class FunDecl(Decl, Scope):
+class FunDecl(RValueDecl, Scope):
     name: str
+    args: 'List[ArgDecl]'
     body: 'StmtBlock'
+    ret_ty: 'Ty'
 
-    def __init__(self, *, name: str, body: 'StmtBlock', **kwargs):
+    def __init__(self, *, name: str, args: 'List[ArgDecl]', body: 'StmtBlock', ret_ty: 'Ty' = TyVoid, **kwargs):
         Decl.__init__(self, **kwargs)
         Scope.__init__(self)
         self.name = name
+        self.args = args
         self.body = body
+        self.ret_ty = ret_ty
+
+    def value_ty(self) -> Ty:
+        return TyFunc(args=[arg.ty for arg in self.args], ret=self.ret_ty)
 
     def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
         return visitor.visit_fun_decl(self, data)
 
     def accept_children(self, visitor: AstVisitor[D, R], data: D):
+        for arg in self.args:
+            visitor.visit(arg, data)
         self.body.accept(visitor, data)
 
     def transform_children(self, transformer: AstTransformer[D], data: D):
+        for i in range(len(self.args)):
+            self.args[i] = transformer.visit(self.args[i], data)
         self.body = self.body.accept(transformer, data)
 
     def declared_name(self) -> str:
         return self.name
 
     def __str__(self):
-        return f"fn {self.name} () {self.body}"
+        args = ", ".join(str(arg) for arg in self.args)
+        return f"fn {self.name}({args}) {self.body}"
 
 
-class VarDecl(Decl):
+class ArgDecl(RValueDecl):
+    name: str
+    ty: 'Ty'
+
+    def __init__(self, *, name: str, ty: Ty, **kwargs):
+        super().__init__(**kwargs)
+        self.name = name
+        self.ty = ty
+
+    def value_ty(self) -> Ty:
+        return self.ty
+
+    def declared_name(self) -> str:
+        return self.name
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_arg_decl(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        pass
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        pass
+
+    def __str__(self):
+        return f"{self.name}: {self.ty}"
+
+
+class VarDecl(RValueDecl):
     name: str
     ty: 'Ty'
     initializer: Union['Expr', None]
@@ -87,6 +128,9 @@ class VarDecl(Decl):
         self.name = name
         self.ty = ty
         self.initializer = initializer
+
+    def value_ty(self) -> Ty:
+        return self.ty
 
     def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
         return visitor.visit_var_decl(self, data)
