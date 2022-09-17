@@ -1,9 +1,9 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr, RValueDecl, ArgDecl
+    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall
 from src.context.compilation_ctx import CompilationCtx
-from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid
+from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
@@ -91,6 +91,25 @@ class TypeCheckVisitor(AstWalker):
         hint = f"Unary '{n.kind.value}' operator is supported only for '{operand_ty}' types"
         self.require_type(n.expr, operand_ty, hint)
         n.ty = result_ty
+
+    def walk_fun_call(self, n: 'FunCall'):
+        super().walk_fun_call(n)
+        assert n.callee.ty is not None
+        if not isinstance(n.callee.ty, TyFunc):
+            self.ctx.add_error_to_node(
+                node=n,
+                message=f"Type '{n.callee.ty}' is not a function",
+                hint="You can only call functions"
+            )
+        elif len(n.args) != len(n.callee.ty.args):
+            self.ctx.add_error_to_node(
+                node=n,
+                message=f"Expected {len(n.callee.ty.args)} arguments but received {len(n.args)}",
+            )
+        else:
+            for formal_arg, arg in zip(n.callee.ty.args, n.args):
+                self.require_type(arg, formal_arg, hint="Invalid argument type")
+            n.ty = n.callee.ty.ret
 
     def walk_assign_stmt(self, n: 'AssignStmt'):
         # calculate types and check lvalue

@@ -1,9 +1,19 @@
-from abc import ABC
-from typing import List
+from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 
 class Ty(ABC):
     ...
+
+
+class TySpecial(Ty):
+    name: str
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __str__(self):
+        return self.name
 
 
 class TyPrimitive(Ty):
@@ -22,7 +32,9 @@ class TyPrimitive(Ty):
         return isinstance(other, TyPrimitive) and self.name == other.name
 
 
-TyUnknown = TyPrimitive(name="unknown")
+TyUnknown = TySpecial(name="unknown")
+TyBuiltin = TySpecial(name="builtin")
+
 TyVoid = TyPrimitive(name="void")
 TyInt = TyPrimitive(name="int")
 TyBool = TyPrimitive(name="bool")

@@ -1,0 +1,6 @@
+fn f(x: int) -> bool {}
+
+fn main() {
+    var a = 1;
+    a = f(1);
+}

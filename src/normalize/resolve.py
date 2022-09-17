@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
-    StmtBlock, builtin_names
+    StmtBlock, builtin_declarations
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -43,11 +43,15 @@ class CheckConstants(AstWalker):
 
 class ResolverVisitor(AstWalker):
     compiler: CompilationCtx
+    builtins_scope: Scope
     scope_node: Scope
 
     def __init__(self, compiler: CompilationCtx):
         super().__init__()
         self.compiler = compiler
+        self.builtins_scope = Scope()
+        for d in builtin_declarations:
+            self.builtins_scope.declare(d)
 
     @property
     def scope(self) -> Scope:
@@ -70,17 +74,13 @@ class ResolverVisitor(AstWalker):
             cur = outerscope(cur)
         if cur is not None and name in cur:
             return cur.get_declaration(name)
+        elif name in self.builtins_scope:
+            return self.builtins_scope.get_declaration(name)
         else:
             return None
 
     def declare(self, d: Decl):
-        if d.declared_name() in builtin_names:
-            self.compiler.add_error_to_node(
-                node=d,
-                message=f"Name '{d.declared_name()}' is already bound to a builtin function and cannot be shadowed",
-                hint=f"You cannot shadow built-in names"
-            )
-        elif d.declared_name() in self.scope:
+        if d.declared_name() in self.scope:
             other_d = self.scope.get_declaration(d.declared_name())
             self.compiler.add_error_to_node(
                 d,

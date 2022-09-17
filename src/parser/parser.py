@@ -108,11 +108,9 @@ class HerbParserVisitor(HerbVisitor):
         return StrLiteral(value=text, span=Span.from_antlr(ctx))
 
     def visitFunCall(self, ctx: HerbParser.FunCallContext):
-        name = str(ctx.IDENT())
-        assert name == "print", "unimplemented: can only call 'print' function"
         return FunCall(
-            name=name,
-            args=[arg for arg in self.visit(ctx.commaSeparatedExprs())],
+            callee=self.visit(ctx.callee),
+            args=[arg for arg in self.visit(ctx.commaSeparatedExprs())] if ctx.commaSeparatedExprs() is not None else [],
             span=Span.from_antlr(ctx),
         )
 

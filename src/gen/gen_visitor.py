@@ -195,7 +195,7 @@ class GenVisitor(AstVisitor):
             assert False
 
     def visit_fun_call(self, call: 'FunCall', data):
-        assert False
+        return
 
     def visit_print(self, n: 'Print', data):
         arg: ir.Value = n.arg.accept(self, None)

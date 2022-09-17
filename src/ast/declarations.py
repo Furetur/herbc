@@ -132,13 +132,13 @@ class VarDecl(RValueDecl):
     def value_ty(self) -> Ty:
         return self.ty
 
-    def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
         return visitor.visit_var_decl(self, data)
 
-    def accept_children(self, visitor: AstVisitor[D, R], data: D):
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
         self.initializer.accept(visitor, data)
 
-    def transform_children(self, transformer: AstTransformer[D], data: D):
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
         self.initializer = self.initializer.accept(transformer, data)
 
     def declared_name(self) -> str:
@@ -149,3 +149,29 @@ class VarDecl(RValueDecl):
 
     def __str__(self):
         return f"const {self.name}: {self.ty or '?'} = {self.initializer};"
+
+
+class BuiltinDecl(RValueDecl):
+    name: str
+
+    def __init__(self, *, name: str, **kwargs):
+        Decl.__init__(self, **kwargs)
+        self.name = name
+
+    def value_ty(self) -> Ty:
+        return TyBuiltin
+
+    def accept(self, visitor: AstVisitor[D, R], data: D) -> R:
+        assert False, "should not be in AST"
+
+    def accept_children(self, visitor: AstVisitor[D, R], data: D):
+        assert False, "should not be in AST"
+
+    def transform_children(self, transformer: AstTransformer[D], data: D):
+        assert False, "should not be in AST"
+
+    def declared_name(self) -> str:
+        return self.name
+
+    def __str__(self):
+        return f"{self.name} built-in"

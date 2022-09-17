@@ -12,8 +12,8 @@ def normalize(ctx: CompilationCtx, module: Module):
     resolve(ctx, module)
     check_main(ctx, module)
     set_parents(module)
+    builtins(ctx, module)
+    set_parents(module)
     typecheck(ctx, module)
     if ctx.has_errors():
         raise CompilationInterrupted()
-    builtins(ctx, module)
-    set_parents(module)

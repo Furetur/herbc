@@ -9,28 +9,30 @@ if TYPE_CHECKING:
 
 
 class FunCall(Expr):
-    name: str
+    callee: 'Expr'
     args: List[Expr]
 
-    def __init__(self, *, name: str, args: List[Expr], **kwargs):
+    def __init__(self, *, callee: 'Expr', args: List[Expr], **kwargs):
         super().__init__(**kwargs)
-        self.name = name
+        self.callee = callee
         self.args = args
 
     def accept(self, visitor: 'AstVisitor', data: 'D') -> 'R':
         return visitor.visit_fun_call(self, data)
 
     def accept_children(self, visitor: 'AstVisitor', data: 'D'):
+        visitor.visit(self.callee, data)
         for arg in self.args:
             arg.accept(visitor, data)
 
     def transform_children(self, transformer: 'AstTransformer', data: 'D'):
+        self.callee = transformer.visit(self.callee, data)
         for i in range(len(self.args)):
             self.args[i] = self.args[i].accept(transformer, data)
 
     def __str__(self):
         args = ", ".join(str(e) for e in self.args)
-        return f"{self.name}({args})"
+        return f"{self.callee}({args})"
 
 
 class IdentExpr(Expr):

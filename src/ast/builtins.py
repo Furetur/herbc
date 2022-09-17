@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, TypeVar
 
+from src.span import INVALID_SPAN
 from src.ty import TyVoid
 
-if TYPE_CHECKING:
-    pass
+from src.ast.declarations import BuiltinDecl
 from src.ast.base import Expr
 from src.ast.visitors import AstTransformer, AstVisitor
 
@@ -12,7 +12,13 @@ D = TypeVar("D")
 R = TypeVar("R")
 
 
-builtin_names = ["print"]
+PrintBuiltinDecl = BuiltinDecl(
+    name="print",
+    span=INVALID_SPAN
+)
+
+builtin_declarations = [PrintBuiltinDecl]
+
 
 class Print(Expr):
     arg: Expr

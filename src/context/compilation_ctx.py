@@ -13,7 +13,7 @@ class CompilationCtx:
     errors: ErrorCtx
     outpath: Path
 
-    def add_error_to_node(self, node: Node, message: str, hint: str):
+    def add_error_to_node(self, node: Node, message: str, hint=""):
         self.errors.add_error(CompilationError(span=node.span, message=message, hint=hint, filepath=module(node).path))
 
     def add_error(self, err: CompilationError):
