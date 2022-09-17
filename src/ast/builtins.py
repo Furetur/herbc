@@ -12,6 +12,8 @@ D = TypeVar("D")
 R = TypeVar("R")
 
 
+builtin_names = ["print"]
+
 class Print(Expr):
     arg: Expr
 

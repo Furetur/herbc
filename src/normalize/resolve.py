@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
-    StmtBlock
+    StmtBlock, builtin_names
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -73,10 +73,13 @@ class ResolverVisitor(AstWalker):
         else:
             return None
 
-    def try_declare(self, d: Decl):
-        if is_top_level(d):
-            # top level declarations are predeclared
-            assert self.scope.get_declaration(d.declared_name()) is d
+    def declare(self, d: Decl):
+        if d.declared_name() in builtin_names:
+            self.compiler.add_error_to_node(
+                node=d,
+                message=f"Name '{d.declared_name()}' is already bound to a builtin function and cannot be shadowed",
+                hint=f"You cannot shadow built-in names"
+            )
         elif d.declared_name() in self.scope:
             other_d = self.scope.get_declaration(d.declared_name())
             self.compiler.add_error_to_node(
@@ -88,7 +91,8 @@ class ResolverVisitor(AstWalker):
             self.scope.declare(d)
 
     def walk_declaration(self, n: 'Decl'):
-        self.try_declare(n)
+        if not is_top_level(n):
+            self.declare(n)
         super().walk_declaration(n)
 
     def walk_module(self, m: 'Module'):
@@ -97,15 +101,14 @@ class ResolverVisitor(AstWalker):
         for i in m.imports:
             self.walk(i)
         for d in m.top_level_decls:
-            m.declare(d)
+            self.declare(d)
         for d in m.top_level_decls:
             self.walk(d)
         self.exit_scope(at_root=True)
 
     def walk_fun_decl(self, fn: 'FunDecl'):
-        self.try_declare(fn)
         self.enter_scope(fn)
-        super().walk_node(fn) # we cannot use walk_declaration because it will call the method above
+        super().walk_fun_decl(fn) # we cannot use walk_declaration because it will call the method above
         self.exit_scope()
 
     def walk_stmt_block(self, n: 'StmtBlock'):
