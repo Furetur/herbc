@@ -1,7 +1,8 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt, Print
+    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt, Print, RetStmt, FunDecl
+from src.ast.utils import first_ancestor_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin, TyStr
 
@@ -153,4 +154,16 @@ class TypeCheckVisitor(AstWalker):
             self.ctx.add_error_to_node(
                 node=n,
                 message=f"Cannot print value of type '{n.arg.ty}'",
+            )
+
+    def walk_ret(self, n: 'RetStmt'):
+        fn = cast(FunDecl, first_ancestor_of_type(n, FunDecl))
+        assert fn is not None, "code can only be written inside of a function"
+
+        expr_ty = n.expr.ty if n.expr is not None else TyVoid
+        if expr_ty != fn.ret_ty:
+            self.ctx.add_error_to_node(
+                node=n,
+                message=f"Expected type '{fn.ret_ty}', but received '{expr_ty}'",
+                hint="The return statement has a value of incorrect type"
             )

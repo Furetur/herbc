@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
-    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind, ArgDecl
+    BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind, \
+    ArgDecl, RetStmt
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationError
 from src.span import Span, INVALID_SPAN
@@ -159,6 +160,12 @@ class HerbParserVisitor(HerbVisitor):
         return WhileStmt(
             cond=self.visit(ctx.expr()),
             body=self.visit(ctx.block()),
+            span=Span.from_antlr(ctx)
+        )
+
+    def visitRetStmt(self, ctx:HerbParser.RetStmtContext):
+        return RetStmt(
+            expr=self.visit(ctx.expr()) if ctx.expr() is not None else None,
             span=Span.from_antlr(ctx)
         )
 

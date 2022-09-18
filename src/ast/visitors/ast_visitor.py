@@ -83,5 +83,8 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_while_stmt(self, n: 'WhileStmt', data: D) -> R:
         return self.visit_statement(n, data)
 
+    def visit_ret(self, n: 'RetStmt', data: D) -> R:
+        return self.visit_statement(n, data)
+
     def visit_statement(self, n: 'Stmt', data: D) -> R:
         return self.visit_node(n, data)

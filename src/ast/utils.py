@@ -26,13 +26,20 @@ def is_top_level(n: 'Node') -> bool:
     return isinstance(n.parent, Module)
 
 
+def first_ancestor_of_type(n: 'Node', typ) -> 'Union[Node, None]':
+    """Starting from the current node"""
+    if isinstance(n, typ):
+        return n
+    if n.parent is None:
+        return None
+    else:
+        return first_ancestor_of_type(n.parent, typ)
+
 def outerscope(n: 'Node') -> Union[Scope, None]:
     if n.parent is None:
         return None
-    elif isinstance(n.parent, Scope):
-        return n.parent
     else:
-        return outerscope(n.parent)
+        return first_ancestor_of_type(n.parent, Scope)
 
 
 def find_descendants_of_type(n: 'Node', typ):

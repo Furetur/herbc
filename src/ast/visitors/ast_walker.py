@@ -144,5 +144,11 @@ class AstWalker(AstVisitor[None, None]):
     def walk_while_stmt(self, n: 'WhileStmt'):
         self.walk_statement(n)
 
-    def visit_while_stmt(self, n: 'WhileStmt', data: 'D'):
+    def visit_while_stmt(self, n: 'WhileStmt', data: None):
         self.walk_while_stmt(n)
+
+    def walk_ret(self, n: 'RetStmt'):
+        self.walk_statement(n)
+
+    def visit_ret(self, n: 'RetStmt', data: None):
+        self.walk_ret(n)

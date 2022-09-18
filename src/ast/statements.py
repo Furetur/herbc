@@ -2,8 +2,9 @@ import dataclasses
 
 from src.ast.base import Stmt
 
-from typing import TYPE_CHECKING, List, Tuple, Dict
+from typing import TYPE_CHECKING, List, Tuple, Dict, Union
 from src.ast import Scope
+from src.ty import TyVoid
 
 if TYPE_CHECKING:
     from src.ast import Expr, AstVisitor, D, R, AstTransformer
@@ -133,3 +134,25 @@ class WhileStmt(Stmt):
     def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
         self.cond = transformer.visit(self.cond, data)
         self.body = transformer.visit(self.body, data)
+
+
+class RetStmt(Stmt):
+    expr: 'Union[Expr, None]'
+
+    def __init__(self, *, expr: 'Union[Expr, None]', **kwargs):
+        super().__init__(**kwargs)
+        self.expr = expr
+
+    def ret_ty(self):
+        return self.expr.ty if self.expr is not None else TyVoid
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_ret(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        if self.expr is not None:
+            visitor.visit(self.expr, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        if self.expr is not None:
+            self.expr = transformer.visit(self.expr, data)

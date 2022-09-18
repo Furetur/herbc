@@ -37,12 +37,15 @@ ifStmt: 'if' expr thenBlock=block ( 'else' (elseIf=ifStmt | elseBlock=block) )?;
 
 whileStmt: 'while' expr block;
 
+retStmt: 'return' expr? ';';
+
 stmt
     : exprStmt
     | varDecl
     | assign
     | ifStmt
     | whileStmt
+    | retStmt
     ;
 
 expr
