@@ -1,0 +1,9 @@
+fn odd(x: int) -> bool {
+    return x % 2 != 0;
+}
+
+fn main() {
+    var filter = odd;
+
+    print(filter(15));
+}

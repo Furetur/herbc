@@ -1,4 +1,6 @@
-fn f(x: int, y: str, z: bool) -> bool {}
+fn f(x: int, y: str, z: bool) -> bool {
+    return true;
+}
 
 fn main() {
     f(1, "2", true);

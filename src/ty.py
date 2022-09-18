@@ -56,3 +56,6 @@ class TyFunc(Ty):
 
     def __str__(self):
         return "(" + ", ".join(str(ty) for ty in self.args) + f") -> {self.ret}"
+
+    def __eq__(self, other):
+        return isinstance(other, TyFunc) and str(self) == str(other)

@@ -157,6 +157,7 @@ class TypeCheckVisitor(AstWalker):
             )
 
     def walk_ret(self, n: 'RetStmt'):
+        super().walk_ret(n)
         fn = cast(FunDecl, first_ancestor_of_type(n, FunDecl))
         assert fn is not None, "code can only be written inside of a function"
 

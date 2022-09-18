@@ -1,6 +1,6 @@
 
 fn f(x: int, y: str) -> bool {
-    x % 2 == 0;
+    return x % 2 == 0;
 }
 
 fn main() {

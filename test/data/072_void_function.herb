@@ -1,0 +1,8 @@
+fn hello() {
+    print("hello");
+}
+
+fn main() {
+    print("hey");
+    hello();
+}

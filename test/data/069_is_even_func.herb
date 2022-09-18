@@ -1,0 +1,17 @@
+fn even(x: int) -> bool {
+    return x % 2 == 0;
+}
+
+
+fn main() {
+    var i = 0;
+    while i < 100 {
+        print(i);
+        if even(i) {
+            print(": even,");
+        } else {
+            print(": odd,");
+        }
+        i = i + 1;
+    }
+}

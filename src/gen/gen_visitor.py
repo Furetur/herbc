@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind
+    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind, RetStmt
 from src.ast.utils import is_top_level, find_descendants_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -23,6 +23,8 @@ class GenVisitor(AstVisitor):
     global_id: int = 0
     globals: Dict[str, ir.GlobalVariable]
 
+    funcs: Dict[Decl, ir.Function]
+
     locals: Dict[Decl, ir.AllocaInstr] # map[local var decl, stack alloca]
 
     def __init__(self, ctx: CompilationCtx, mod: Module):
@@ -31,6 +33,7 @@ class GenVisitor(AstVisitor):
         self.module = ir.Module(name=mod.unique_name)
         self.header = dict()
         self.globals = dict()
+        self.funcs = dict()
         self.locals = dict()
 
     def generate(self) -> ir.Module:
@@ -63,7 +66,9 @@ class GenVisitor(AstVisitor):
         return lit
 
     def gen_ptr_to_decl(self, decl: Decl) -> ir.Value:
-        if is_top_level(decl):
+        if isinstance(decl, FunDecl):
+            return self.funcs[decl]
+        elif is_top_level(decl):
             # global variable
             name = global_name(decl)
             assert name in self.globals, "Global variable was not generated"
@@ -76,7 +81,7 @@ class GenVisitor(AstVisitor):
     def stack_alloc_if_needed(self, n: 'VarDecl') -> ir.AllocaInstr:
         if n in self.locals:
             return self.locals[n]
-        alloca = self.builder.alloca(ll_type(n.ty))
+        alloca = self.builder.alloca(ll_value_type(n.ty))
         self.locals[n] = alloca
         return alloca
 
@@ -88,19 +93,34 @@ class GenVisitor(AstVisitor):
     # Declarations
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
-        if fn.name != USER_MAIN_FN_NAME:
-            return
-        f = ir.Function(self.module, main_fn_type, name=OUT_MAIN_FN_NAME)
+        if fn.name == USER_MAIN_FN_NAME:
+            # special treatment of 'main' function
+            # this is needed because in the user code the main function returns void,
+            # but actually it returns int
+            f = ir.Function(self.module, main_fn_type, OUT_MAIN_FN_NAME)
+        else:
+            f = ir.Function(self.module, ll_func_type(fn.value_ty()), global_name(fn))
+        self.funcs[fn] = f
         self.f = f
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
+        # store all arguments in local variables
+        assert len(f.args) == len(fn.args)
+        for argDecl, ll_arg in zip(fn.args, f.args):
+            alloca = self.builder.alloca(ll_value_type(argDecl.ty))
+            self.builder.store(ll_arg, alloca)
+            self.locals[argDecl] = alloca
+        # generate body
         fn.body.accept(self, None)
-        self.builder.ret(ir.Constant(int_type, 0))
+        if fn.name == USER_MAIN_FN_NAME:
+            self.builder.ret(ir.Constant(int_type, 0))
+        elif fn.ret_ty == TyVoid:
+            self.builder.ret_void()
 
     def visit_var_decl(self, n: 'VarDecl', data):
         if is_top_level(n):
             # global variable
             name = global_name(n)
-            glob = ir.GlobalVariable(self.module, ll_type(n.ty), name=name)
+            glob = ir.GlobalVariable(self.module, ll_value_type(n.ty), name=name)
             glob.initializer = n.initializer.accept(self, None)
             self.globals[name] = glob
         else:
@@ -129,7 +149,8 @@ class GenVisitor(AstVisitor):
             # generate 'then'
             self.builder = ir.IRBuilder(then)
             self.visit(block, None)
-            self.builder.branch(after) # IMPORTANT: jump to 'after'
+            if not self.builder.block.is_terminated:
+                self.builder.branch(after) # IMPORTANT: jump to 'after'
             # switch to generating 'else'
             # the next if condition should be generated inside this else basic block
             self.builder = ir.IRBuilder(els)
@@ -138,7 +159,8 @@ class GenVisitor(AstVisitor):
         # if there's no else branch we generate empty else block that jumps to 'before'
         if n.else_branch is not None:
             self.visit(n.else_branch, None)
-        self.builder.branch(after) # IMPORTANT: jump to 'after'
+        if not self.builder.block.is_terminated:
+            self.builder.branch(after) # IMPORTANT: jump to 'after'
         self.builder = ir.IRBuilder(after)
 
     def visit_while_stmt(self, n: 'WhileStmt', data):
@@ -160,6 +182,13 @@ class GenVisitor(AstVisitor):
         self.builder.branch(cond_block)
         # after block
         self.builder = ir.IRBuilder(after_block)
+
+    def visit_ret(self, n: 'RetStmt', data):
+        if n.expr is None:
+            self.builder.ret_void()
+        else:
+            expr = self.visit(n.expr, None)
+            self.builder.ret(expr)
 
     # Expressions
 
@@ -194,8 +223,11 @@ class GenVisitor(AstVisitor):
         else:
             assert False
 
-    def visit_fun_call(self, call: 'FunCall', data):
-        return
+    def visit_fun_call(self, call: 'FunCall', data) -> ir.Value:
+        return self.builder.call(
+            fn=self.visit(call.callee, None),
+            args=[self.visit(arg, None) for arg in call.args]
+        )
 
     def visit_print(self, n: 'Print', data):
         arg: ir.Value = n.arg.accept(self, None)
@@ -213,8 +245,15 @@ class GenVisitor(AstVisitor):
     def visit_ident_expr(self, n: 'IdentExpr', data) -> ir.Value:
         assert n.decl is not None
         ptr = self.gen_ptr_to_decl(n.decl)
-        load = self.builder.load(ptr)
-        return self.builder.bitcast(load, ll_type(n.ty))
+        if isinstance(n.decl, FunDecl):
+            # functions are already stored as pointers,
+            # and we need them as pointers
+            value = ptr
+        else:
+            # any variables are stored as pointers,
+            # but we need to dereference them to use as values
+            value = self.builder.load(ptr)
+        return self.builder.bitcast(value, ll_value_type(n.ty))
 
     def visit_int_literal(self, lit: 'IntLiteral', data) -> ir.Constant:
         return ir.Constant(int_type, lit.value)

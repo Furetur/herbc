@@ -1,0 +1,30 @@
+fn filteredRange(filter: (int) -> bool, map: (int) -> int) {
+    var i = 0;
+    while i < 100 {
+        if filter(i) {
+            print(map(i));
+            print(",");
+        }
+        i = i + 1;
+    }
+}
+
+fn is_prime(x: int) -> bool {
+    var i = 2;
+
+    while i * i <= x {
+        if x % i == 0 {
+            return false;
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+fn square(x: int) -> int {
+    return x * x;
+}
+
+fn main() {
+    filteredRange(is_prime, square);
+}
