@@ -58,7 +58,7 @@ class Test:
         assert path.is_file()
         self.path = path
         stem = path.stem
-        if "nc_" in stem:
+        if "_nc_" in stem:
             self.typ = TestType.CompileTimeError
         elif "nr_" in stem:
             self.typ = TestType.RuntimeError
