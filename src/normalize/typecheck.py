@@ -1,9 +1,9 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt
+    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt, Print
 from src.context.compilation_ctx import CompilationCtx
-from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin
+from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin, TyStr
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
@@ -146,3 +146,11 @@ class TypeCheckVisitor(AstWalker):
     def walk_while_stmt(self, n: 'WhileStmt'):
         super().walk_while_stmt(n)
         self.require_type(n.cond, TyBool, "While conditions must be of type 'bool'")
+
+    def walk_print(self, n: 'Print'):
+        super().walk_print(n)
+        if n.arg.ty not in [TyInt, TyBool, TyStr]:
+            self.ctx.add_error_to_node(
+                node=n,
+                message=f"Cannot print value of type '{n.arg.ty}'",
+            )

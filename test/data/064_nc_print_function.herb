@@ -1,0 +1,6 @@
+fn f() {}
+
+fn main() {
+    var a = f;
+    print(a);
+}
