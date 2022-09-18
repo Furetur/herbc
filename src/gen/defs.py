@@ -15,9 +15,9 @@ byteptr = ir.PointerType(byte_type)
 str_type = byteptr
 
 # functions
-main_fn_type = ir.FunctionType(int_type, [])
+main_fn_type = ir.FunctionType(void_type, [])
 USER_MAIN_FN_NAME = "main"
-OUT_MAIN_FN_NAME = "main"
+OUT_MAIN_FN_NAME = "__HERB__entry"
 
 print_int_fn_type = ir.FunctionType(void_type, [int_type])
 PRINT_INT_FN_NAME = "print_int"

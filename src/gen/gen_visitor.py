@@ -93,13 +93,11 @@ class GenVisitor(AstVisitor):
     # Declarations
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
-        if fn.name == USER_MAIN_FN_NAME:
-            # special treatment of 'main' function
-            # this is needed because in the user code the main function returns void,
-            # but actually it returns int
-            f = ir.Function(self.module, main_fn_type, OUT_MAIN_FN_NAME)
-        else:
-            f = ir.Function(self.module, ll_func_type(fn.value_ty()), global_name(fn))
+        f = ir.Function(
+            module=self.module,
+            ftype=ll_func_type(fn.value_ty()),
+            name= global_name(fn) if fn.name != USER_MAIN_FN_NAME else OUT_MAIN_FN_NAME
+        )
         self.funcs[fn] = f
         self.f = f
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
@@ -111,9 +109,7 @@ class GenVisitor(AstVisitor):
             self.locals[argDecl] = alloca
         # generate body
         fn.body.accept(self, None)
-        if fn.name == USER_MAIN_FN_NAME:
-            self.builder.ret(ir.Constant(int_type, 0))
-        elif fn.ret_ty == TyVoid:
+        if fn.ret_ty == TyVoid and not self.builder.block.is_terminated:
             self.builder.ret_void()
 
     def visit_var_decl(self, n: 'VarDecl', data):
