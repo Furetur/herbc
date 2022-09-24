@@ -132,8 +132,7 @@ class TypeCheckVisitor(AstWalker):
         if not isinstance(n.lvalue, IdentExpr) or not isinstance(n.lvalue.decl, VarDecl):
             self.ctx.add_error_to_node(
                 node=n.lvalue,
-                message="Expected a variable on the left-hand side",
-                hint="You can only assign to variables (identifiers)"
+                message="Expected a variable on the left-hand side"
             )
             return
         self.walk(n.lvalue)

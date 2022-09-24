@@ -1,6 +1,6 @@
 from llvmlite import ir
 
-from src.ast import Decl
+from src.ast import Decl, FunDecl
 from src.ast.utils import module
 from src.ty import Ty, TyInt, TyBool, TyStr, TyFunc, TyVoid
 
@@ -27,6 +27,13 @@ PRINT_BOOL_FN_NAME = "print_bool"
 
 print_str_fn_type = ir.FunctionType(void_type, [str_type])
 PRINT_STR_FN_NAME = "print_str"
+
+
+def func_name(fn: FunDecl):
+    if fn.name != USER_MAIN_FN_NAME:
+        return f"{module(fn).unique_name}.func.{fn.name}"
+    else:
+        return OUT_MAIN_FN_NAME
 
 
 def global_name(decl: Decl):

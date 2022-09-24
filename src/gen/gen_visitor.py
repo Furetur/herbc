@@ -23,8 +23,6 @@ class GenVisitor(AstVisitor):
     global_id: int = 0
     globals: Dict[str, ir.GlobalVariable]
 
-    funcs: Dict[Decl, ir.Function]
-
     locals: Dict[Decl, ir.AllocaInstr] # map[local var decl, stack alloca]
 
     def __init__(self, ctx: CompilationCtx, mod: Module):
@@ -33,7 +31,6 @@ class GenVisitor(AstVisitor):
         self.module = ir.Module(name=mod.unique_name)
         self.header = dict()
         self.globals = dict()
-        self.funcs = dict()
         self.locals = dict()
 
     def generate(self) -> ir.Module:
@@ -66,9 +63,7 @@ class GenVisitor(AstVisitor):
         return lit
 
     def gen_ptr_to_decl(self, decl: Decl) -> ir.Value:
-        if isinstance(decl, FunDecl):
-            return self.funcs[decl]
-        elif is_top_level(decl):
+        if is_top_level(decl):
             # global variable
             name = global_name(decl)
             assert name in self.globals, "Global variable was not generated"
@@ -93,12 +88,20 @@ class GenVisitor(AstVisitor):
     # Declarations
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
+        fname = func_name(fn)
+        # declare func
         f = ir.Function(
             module=self.module,
             ftype=ll_func_type(fn.value_ty()),
-            name= global_name(fn) if fn.name != USER_MAIN_FN_NAME else OUT_MAIN_FN_NAME
+            name=fname
         )
-        self.funcs[fn] = f
+        # store in global var
+        globalname = global_name(fn)
+        glob = ir.GlobalVariable(self.module, ll_value_type(fn.value_ty()), name=globalname)
+        glob.initializer = f
+        glob.global_constant = True
+        self.globals[globalname] = glob
+        # modify visitor state
         self.f = f
         self.builder = ir.IRBuilder(f.append_basic_block(name="entry"))
         # store all arguments in local variables
@@ -241,14 +244,7 @@ class GenVisitor(AstVisitor):
     def visit_ident_expr(self, n: 'IdentExpr', data) -> ir.Value:
         assert n.decl is not None
         ptr = self.gen_ptr_to_decl(n.decl)
-        if isinstance(n.decl, FunDecl):
-            # functions are already stored as pointers,
-            # and we need them as pointers
-            value = ptr
-        else:
-            # any variables are stored as pointers,
-            # but we need to dereference them to use as values
-            value = self.builder.load(ptr)
+        value = self.builder.load(ptr)
         return self.builder.bitcast(value, ll_value_type(n.ty))
 
     def visit_int_literal(self, lit: 'IntLiteral', data) -> ir.Constant:
