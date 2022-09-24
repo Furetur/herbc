@@ -1,0 +1,13 @@
+fn one() -> int {
+    return 1;
+
+    var i = 0;
+    while i < 100 {
+        print(i);
+        i = i + 1;
+    }
+}
+
+fn main() {
+    print(one());
+}

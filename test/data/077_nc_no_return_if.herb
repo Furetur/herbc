@@ -1,0 +1,10 @@
+
+fn foo(x: int) -> bool {
+    if x == 1 {
+    } else {
+        return false;
+    }
+}
+
+fn main() {
+}

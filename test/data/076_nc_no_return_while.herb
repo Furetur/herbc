@@ -1,0 +1,9 @@
+
+fn foo(x: int) -> int {
+    while x < 10 {
+        return 1;
+    }
+}
+
+fn main() {
+}

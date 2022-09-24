@@ -4,12 +4,15 @@ from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind
     UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt, Print, RetStmt, FunDecl
 from src.ast.utils import first_ancestor_of_type
 from src.context.compilation_ctx import CompilationCtx
+from src.normalize.function_termination_check import FunctionTerminationChecker
 from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin, TyStr
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
     v = TypeCheckVisitor(ctx)
     v.walk(mod)
+    v = FunctionTerminationChecker(ctx)
+    v.visit(mod, None)
 
 
 # (operand_type, result_type)
