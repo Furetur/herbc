@@ -30,10 +30,7 @@ PRINT_STR_FN_NAME = "print_str"
 
 
 def func_name(fn: FunDecl):
-    if fn.name != USER_MAIN_FN_NAME:
-        return f"{module(fn).unique_name}.func.{fn.name}"
-    else:
-        return OUT_MAIN_FN_NAME
+    return f"{module(fn).unique_name}.func.{fn.name}"
 
 
 def global_name(decl: Decl):

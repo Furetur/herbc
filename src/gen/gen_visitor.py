@@ -98,12 +98,11 @@ class GenVisitor(AstVisitor):
         self.builder.ret_void()
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
-        fname = func_name(fn)
         # declare func
         f = ir.Function(
             module=self.module,
             ftype=ll_func_type(fn.value_ty()),
-            name=fname
+            name=func_name(fn)
         )
         # store in global var
         globalname = global_name(fn)
