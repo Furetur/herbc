@@ -9,7 +9,7 @@ topLevelDecl
 
 importDecl
     : 'import' importPath ';' #importWithoutAlias
-    | 'import' IDENT '=' importPath ';' #importWithAlias
+    | 'import' importPath 'as' IDENT ';' #importWithAlias
     ;
 
 importPath

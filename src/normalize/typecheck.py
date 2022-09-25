@@ -1,11 +1,11 @@
 from typing import cast
 
 from src.ast import Module, VarDecl, IdentExpr, AstWalker, AssignStmt, BinopKind, Expr, BinopExpr, IfStmt, WhileStmt, \
-    UnopKind, UnopExpr, RValueDecl, ArgDecl, FunCall, ExprStmt, Print, RetStmt, FunDecl
+    UnopKind, UnopExpr, ArgDecl, FunCall, ExprStmt, Print, RetStmt, FunDecl
 from src.ast.utils import first_ancestor_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.normalize.function_termination_check import FunctionTerminationChecker
-from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin, TyStr
+from src.ty import TyUnknown, TyInt, Ty, TyBool, TyVoid, TyFunc, TyBuiltin, TyStr, TySpecial
 
 
 def typecheck(ctx: CompilationCtx, mod: Module):
@@ -76,13 +76,12 @@ class TypeCheckVisitor(AstWalker):
 
     def walk_ident_expr(self, i: 'IdentExpr'):
         assert i.decl is not None
-        assert isinstance(i.decl, RValueDecl)
-        i.ty = cast(RValueDecl, i.decl).value_ty()
-        if i.ty == TyBuiltin:
+        i.ty = i.decl.value_ty()
+        if isinstance(i.ty, TySpecial):
             self.ctx.add_error_to_node(
                 node=i,
-                message="Cannot use a builtin as a value",
-                hint="You can only call a builtin, you cannot store it anywhere"
+                message="Cannot use this as a value",
+                hint=f"You are trying to use {i.ty} as a value but you cannot"
             )
 
     def walk_binop(self, n: 'BinopExpr'):

@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from src.ty import *
 from src.ast.visitors import *
-from src.ast.base import Decl, RValueDecl
+from src.ast.base import Decl
 from src.ast.scope import Scope
 
 
@@ -35,6 +35,9 @@ class Import(Decl):
         assert len(self.path) > 0
         return self.alias if self.alias != "" else self.path[-1]
 
+    def value_ty(self) -> Ty:
+        return TySpecial(name=f"module {self.declared_name()}")
+
     def has_alias(self) -> bool:
         return self.alias != ""
 
@@ -60,6 +63,9 @@ class Entrypoint(Decl):
     def declared_name(self) -> str:
         return "-entrypoint-"
 
+    def value_ty(self) -> Ty:
+        return TyEntry
+
     def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
         return visitor.visit_entry(self, data)
 
@@ -73,7 +79,7 @@ class Entrypoint(Decl):
         return f"entrypoint {self.block}"
 
 
-class FunDecl(RValueDecl, Scope):
+class FunDecl(Decl, Scope):
     name: str
     args: 'List[ArgDecl]'
     body: 'StmtBlock'
@@ -111,7 +117,7 @@ class FunDecl(RValueDecl, Scope):
         return f"fn {self.name}({args}) {self.body}"
 
 
-class ArgDecl(RValueDecl):
+class ArgDecl(Decl):
     name: str
     ty: 'Ty'
 
@@ -139,7 +145,7 @@ class ArgDecl(RValueDecl):
         return f"{self.name}: {self.ty}"
 
 
-class VarDecl(RValueDecl):
+class VarDecl(Decl):
     name: str
     ty: 'Ty'
     initializer: Union['Expr', None]
@@ -172,7 +178,7 @@ class VarDecl(RValueDecl):
         return f"const {self.name}: {self.ty or '?'} = {self.initializer};"
 
 
-class BuiltinDecl(RValueDecl):
+class BuiltinDecl(Decl):
     name: str
 
     def __init__(self, *, name: str, **kwargs):

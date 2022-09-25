@@ -34,6 +34,7 @@ class TyPrimitive(Ty):
 
 TyUnknown = TySpecial(name="unknown")
 TyBuiltin = TySpecial(name="builtin")
+TyEntry = TySpecial(name="entry")
 
 TyVoid = TyPrimitive(name="void")
 TyInt = TyPrimitive(name="int")
