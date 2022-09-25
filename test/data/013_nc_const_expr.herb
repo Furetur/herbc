@@ -1,4 +1,4 @@
 
 const a = print(1);
 
-fn main() {}
+entrypoint {}

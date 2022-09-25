@@ -1,6 +1,6 @@
 fn f(x: int) -> bool {}
 
-fn main() {
+entrypoint {
     var a = 1;
     a = f(1);
 }

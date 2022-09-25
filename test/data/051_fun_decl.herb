@@ -3,6 +3,6 @@ fn f(x: int, y: str) -> bool {
     return x % 2 == 0;
 }
 
-fn main() {
+entrypoint {
     print("ok");
 }

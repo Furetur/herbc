@@ -3,7 +3,7 @@ var i1 = 111;
 var T = true;
 var name = "Имя";
 
-fn main() {
+entrypoint {
     print(i1);
     var i2 = 222;
     print(T);

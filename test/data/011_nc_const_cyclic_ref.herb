@@ -3,6 +3,6 @@ var a = c;
 var b = a;
 var c = b;
 
-fn main() {
+entrypoint {
     print(a);
 }

@@ -25,5 +25,5 @@ fn foo(x: int, y: int) -> bool {
     }
 }
 
-fn main() {
+entrypoint {
 }

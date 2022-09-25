@@ -1,6 +1,6 @@
 grammar Herb;
 
-prog : importDecl* topLevelDecl* EOF;
+prog : importDecl* (topLevelDecl | entrypointDecl)* EOF;
 
 topLevelDecl
     : funcDecl
@@ -24,6 +24,8 @@ funcDecl
 varDecl
     : 'var' IDENT '=' expr ';'
     ;
+
+entrypointDecl: 'entrypoint' block;
 
 argDecl: IDENT ':' typ;
 

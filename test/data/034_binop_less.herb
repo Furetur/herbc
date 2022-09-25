@@ -1,6 +1,6 @@
 var a = 10;
 
-fn main() {
+entrypoint {
     var b = 100;
 
     print(a + 89 < b);

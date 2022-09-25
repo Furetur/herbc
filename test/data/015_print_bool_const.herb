@@ -2,7 +2,7 @@
 var T = true;
 var F = false;
 
-fn main() {
+entrypoint {
     print(12345);
     print(T);
     print(F);

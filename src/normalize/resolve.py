@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
-    StmtBlock, builtin_declarations
+    StmtBlock, builtin_declarations, Entrypoint
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -104,6 +104,8 @@ class ResolverVisitor(AstWalker):
             self.declare(d)
         for d in m.top_level_decls:
             self.walk(d)
+        if m.entry is not None:
+            self.walk(m.entry)
         self.exit_scope(at_root=True)
 
     def walk_fun_decl(self, fn: 'FunDecl'):

@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     var i = 100;
 
     if i < 10 {

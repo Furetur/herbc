@@ -2,7 +2,7 @@ import dataclasses
 from typing import Dict
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
-    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind, RetStmt
+    Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind, RetStmt, Entrypoint
 from src.ast.utils import is_top_level, find_descendants_of_type
 from src.context.compilation_ctx import CompilationCtx
 from src.gen.defs import *
@@ -86,6 +86,16 @@ class GenVisitor(AstVisitor):
         n.accept_children(self, data)
 
     # Declarations
+
+    def visit_entry(self, n: 'Entrypoint', data):
+        self.f = ir.Function(
+            module=self.module,
+            ftype=main_fn_type,
+            name=OUT_MAIN_FN_NAME
+        )
+        self.builder = ir.IRBuilder(self.f.append_basic_block(name="entry"))
+        self.visit(n.block, None)
+        self.builder.ret_void()
 
     def visit_fun_decl(self, fn: 'FunDecl', data):
         fname = func_name(fn)

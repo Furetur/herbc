@@ -1,6 +1,6 @@
 var a = 10;
 
-fn main() {
+entrypoint {
     var b = 15;
 
     print(a + b + 100);

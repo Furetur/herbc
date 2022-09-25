@@ -1,6 +1,6 @@
 var a = "hello";
 
-fn main() {
+entrypoint {
     print(a);
     a = "world";
     print(a);

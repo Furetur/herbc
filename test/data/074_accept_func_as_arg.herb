@@ -22,6 +22,6 @@ fn is_prime(x: int) -> bool {
 }
 
 
-fn main() {
+entrypoint {
     filteredRange(is_prime);
 }

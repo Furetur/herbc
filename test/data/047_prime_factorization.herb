@@ -1,4 +1,4 @@
-fn main() -> void {
+entrypoint {
     var n = 12538 * 144;
 
     var div = 2;

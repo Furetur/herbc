@@ -35,6 +35,12 @@ class AstWalker(AstVisitor[None, None]):
     def visit_import(self, n: 'Import', data: None):
         self.walk_import(n)
 
+    def walk_entry(self, n: 'Entrypoint'):
+        self.walk_declaration(n)
+
+    def visit_entry(self, n: 'Entrypoint', data: None):
+        self.walk_entry(n)
+
     def walk_fun_decl(self, n: 'FunDecl'):
         self.walk_declaration(n)
 

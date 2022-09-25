@@ -2,7 +2,7 @@ fn odd(x: int) -> bool {
     return x % 2 != 0;
 }
 
-fn main() {
+entrypoint {
     var filter = odd;
 
     print(filter(15));

@@ -11,5 +11,5 @@ fn foo(x: int) -> bool {
     }
 }
 
-fn main() {
+entrypoint {
 }

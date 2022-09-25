@@ -2,7 +2,7 @@
 var a = 1;
 var b = 2;
 
-fn main() {
+entrypoint {
     print(a);
     var c = 3;
     print(b);

@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     var b = true;
     s = "101";
 }

@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     var s = "string";
     s = 101;
 }

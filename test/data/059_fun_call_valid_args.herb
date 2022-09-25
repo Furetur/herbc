@@ -2,6 +2,6 @@ fn f(x: int, y: str, z: bool) -> bool {
     return true;
 }
 
-fn main() {
+entrypoint {
     f(1, "2", true);
 }

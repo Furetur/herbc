@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     print(1 + 2 * 3);
     print(" ");
     print(2 * 3 * -1);

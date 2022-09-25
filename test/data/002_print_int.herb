@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     print(12345);
     print(54321);
 }

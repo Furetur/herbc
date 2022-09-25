@@ -52,6 +52,27 @@ class Import(Decl):
         return f"import {self.declared_name()} = {self.import_path()};"
 
 
+class Entrypoint(Decl):
+    def __init__(self, *, block: 'StmtBlock', **kwargs):
+        Decl.__init__(self, **kwargs)
+        self.block = block
+
+    def declared_name(self) -> str:
+        return "-entrypoint-"
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_entry(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        visitor.visit(self.block, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.block = transformer.visit(self.block, data)
+
+    def __str__(self):
+        return f"entrypoint {self.block}"
+
+
 class FunDecl(RValueDecl, Scope):
     name: str
     args: 'List[ArgDecl]'

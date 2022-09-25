@@ -2,7 +2,7 @@ fn hello() {
     print("hello");
 }
 
-fn main() {
+entrypoint {
     print("hey");
     hello();
 }

@@ -2,8 +2,7 @@ fn even(x: int) -> bool {
     return x % 2 == 0;
 }
 
-
-fn main() {
+entrypoint {
     var i = 0;
     while i < 100 {
         print(i);

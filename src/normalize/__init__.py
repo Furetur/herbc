@@ -10,7 +10,12 @@ from src.normalize.typecheck import typecheck
 
 def normalize(ctx: CompilationCtx, module: Module):
     resolve(ctx, module)
-    check_main(ctx, module)
+    if module.entry is None:
+        ctx.add_error_to_node(
+            node=module,
+            message="Module must have an entrypoint defined",
+            hint="Use the 'entrypoint {}' construction"
+        )
     set_parents(module)
     builtins(ctx, module)
     set_parents(module)

@@ -6,5 +6,5 @@ fn f(x: int) -> str {
     }
 }
 
-fn main() {
+entrypoint {
 }

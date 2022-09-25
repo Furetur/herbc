@@ -8,6 +8,6 @@ fn one() -> int {
     }
 }
 
-fn main() {
+entrypoint {
     print(one());
 }

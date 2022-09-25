@@ -161,8 +161,12 @@ class TypeCheckVisitor(AstWalker):
     def walk_ret(self, n: 'RetStmt'):
         super().walk_ret(n)
         fn = cast(FunDecl, first_ancestor_of_type(n, FunDecl))
-        assert fn is not None, "code can only be written inside of a function"
-
+        if fn is None:
+            self.ctx.add_error_to_node(
+                node=n,
+                message="'return' statements can only be used inside functions"
+            )
+            return
         expr_ty = n.expr.ty if n.expr is not None else TyVoid
         if expr_ty != fn.ret_ty:
             self.ctx.add_error_to_node(

@@ -28,6 +28,9 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_import(self, n: 'Import', data: D) -> R:
         return self.visit_declaration(n, data)
 
+    def visit_entry(self, n: 'Entrypoint', data: D) -> R:
+        return self.visit_declaration(n, data)
+
     def visit_fun_decl(self, n: 'FunDecl', data: D) -> R:
         return self.visit_declaration(n, data)
 

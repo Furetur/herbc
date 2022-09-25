@@ -1,7 +1,7 @@
 var global = 1;
 var str = "HelloWorld";
 
-fn main() {
+entrypoint {
     print(str);
     var a = 2;
     print(global);

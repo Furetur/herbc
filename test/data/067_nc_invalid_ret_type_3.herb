@@ -2,5 +2,5 @@ fn f() -> str {
     return true;
 }
 
-fn main() {
+entrypoint {
 }

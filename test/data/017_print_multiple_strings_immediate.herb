@@ -1,5 +1,5 @@
 
-fn main() {
+entrypoint {
     print("First");
     print(" second");
     print(" три 😂");

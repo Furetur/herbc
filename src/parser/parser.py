@@ -3,7 +3,7 @@ from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
     BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind, \
-    ArgDecl, RetStmt
+    ArgDecl, RetStmt, Entrypoint, fancy_pos
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationError
 from src.span import Span, INVALID_SPAN
@@ -28,20 +28,21 @@ class HerbParserVisitor(HerbVisitor):
 
     def visitProg(self, ctx: HerbParser.ProgContext) -> Module:
         # imports
-        imports = []
-        i = 0
-        while (impCtx := ctx.importDecl(i)) is not None:
-            i += 1
-            imp: Import = impCtx.accept(self)
-            imports.append(imp)
-        # declarations
-        declarations = []
-        i = 0
-        while (declCtx := ctx.topLevelDecl(i)) is not None:
-            i += 1
-            decl: Decl = self.visit(declCtx)
-            declarations.append(decl)
-        return Module(imports=imports, top_level_decls=declarations, path=self.filepath, span=Span(0, 0))
+        imports = [self.visit(n) for n in get_all(ctx.importDecl)]
+        declarations = [self.visit(n) for n in get_all(ctx.topLevelDecl)]
+        entrypoints = [self.visit(n) for n in get_all(ctx.entrypointDecl)]
+        for entry in entrypoints[1:]:
+            self.compiler.add_error_to_node(
+                node=entry,
+                message=f"Entrypoint is already defined in this module ({fancy_pos(entrypoints[0])})"
+            )
+        return Module(
+            imports=imports,
+            top_level_decls=declarations,
+            path=self.filepath,
+            entry=entrypoints[0] if len(entrypoints) != 0 else None,
+            span=Span(0, 0)
+        )
 
     # ===== DECLARATIONS =====
     def visitImportWithAlias(self, ctx: HerbParser.ImportWithAliasContext):
@@ -52,6 +53,12 @@ class HerbParserVisitor(HerbVisitor):
     def visitImportWithoutAlias(self, ctx: HerbParser.ImportWithoutAliasContext):
         is_relative, path = ctx.importPath().accept(self)
         return Import(alias="", path=path, is_relative=is_relative, span=Span.from_antlr(ctx))
+
+    def visitEntrypointDecl(self, ctx:HerbParser.EntrypointDeclContext):
+        return Entrypoint(
+            block=self.visit(ctx.block()),
+            span=Span.from_antlr(ctx)
+        )
 
     def visitFuncDecl(self, ctx: HerbParser.FuncDeclContext):
         return FunDecl(

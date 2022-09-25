@@ -1,5 +1,5 @@
 fn f() {}
 
-fn main() {
+entrypoint {
     var a = f();
 }

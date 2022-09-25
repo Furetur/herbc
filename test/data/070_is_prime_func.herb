@@ -11,7 +11,7 @@ fn is_prime(x: int) -> bool {
 }
 
 
-fn main() {
+entrypoint {
     var i = 2;
 
     while i < 100 {

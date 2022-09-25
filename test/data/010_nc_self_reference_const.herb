@@ -1,6 +1,6 @@
 
 var a = a;
 
-fn main() {
+entrypoint {
     print(a);
 }

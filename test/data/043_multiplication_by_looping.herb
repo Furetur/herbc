@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     var result = 0;
 
     var i = 0;

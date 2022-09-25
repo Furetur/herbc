@@ -1,4 +1,4 @@
-fn main() {
+entrypoint {
     var print = 1;
     print("ok");
 }
