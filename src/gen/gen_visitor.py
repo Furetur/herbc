@@ -66,7 +66,14 @@ class GenVisitor(AstVisitor):
         if is_top_level(decl):
             # global variable
             name = global_name(decl)
-            assert name in self.globals, "Global variable was not generated"
+            if module(decl) == self.module_node:
+                # this symbol is defined in the current module
+                assert name in self.globals, "Global variable was not generated"
+            elif name not in self.globals:
+                # this is a reference to a symbol from other module
+                # this is the first time encountering this symbol in this module
+                glob = ir.GlobalVariable(self.module, ll_value_type(decl.value_ty()), name=name)
+                self.globals[name] = glob
             return self.globals[global_name(decl)]
         else:
             # local variable

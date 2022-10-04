@@ -115,6 +115,12 @@ class AstWalker(AstVisitor[None, None]):
     def visit_ident_expr(self, n: 'IdentExpr', data: None):
         self.walk_ident_expr(n)
 
+    def walk_dot_expr(self, n: 'DotExpr'):
+        self.walk_expression(n)
+
+    def visit_dot_expr(self, n: 'DotExpr', data: None):
+        self.walk_dot_expr(n)
+
     # statements
 
     def walk_statement(self, n: 'Stmt'):

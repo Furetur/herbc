@@ -1,10 +1,11 @@
-from typing import Union, List
+from typing import Union, List, cast
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
-    StmtBlock, builtin_declarations, Entrypoint
+    StmtBlock, builtin_declarations, Entrypoint, AstTransformer, Expr, DotExpr
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
+from src.ty import TyModule
 
 
 def resolve(compiler: CompilationCtx, mod: Module):
@@ -12,7 +13,7 @@ def resolve(compiler: CompilationCtx, mod: Module):
     mod.accept(CheckConstants(compiler), None)
     if compiler.has_errors():
         raise CompilationInterrupted()
-    v = ResolverVisitor(compiler)
+    v = ResolverTransformer(compiler)
     mod.accept(v, None)
     if compiler.has_errors():
         raise CompilationInterrupted()
@@ -41,7 +42,8 @@ class CheckConstants(AstWalker):
                 hint="Replace with a literal"
             )
 
-class ResolverVisitor(AstWalker):
+
+class ResolverTransformer(AstTransformer):
     compiler: CompilationCtx
     builtins_scope: Scope
     scope_node: Scope
@@ -90,37 +92,73 @@ class ResolverVisitor(AstWalker):
         else:
             self.scope.declare(d)
 
-    def walk_declaration(self, n: 'Decl'):
+    def visit_declaration(self, n: 'Decl', d: None) -> 'Decl':
         if not is_top_level(n):
             self.declare(n)
-        super().walk_declaration(n)
+        return super().visit_declaration(n, None)
 
-    def walk_module(self, m: 'Module'):
+    def visit_module(self, m: 'Module', d: None) -> 'Module':
         self.enter_scope(m)
         # in module declarations are unordered
         for i in m.imports:
-            self.walk(i)
+            self.declare(i)
         for d in m.top_level_decls:
             self.declare(d)
-        for d in m.top_level_decls:
-            self.walk(d)
-        if m.entry is not None:
-            self.walk(m.entry)
+        res = super().visit_module(m, None)
         self.exit_scope(at_root=True)
+        return res
 
-    def walk_fun_decl(self, fn: 'FunDecl'):
+    def visit_fun_decl(self, fn: 'FunDecl', d: None):
         self.enter_scope(fn)
-        super().walk_fun_decl(fn) # we cannot use walk_declaration because it will call the method above
+        res = super().visit_fun_decl(fn, None)
         self.exit_scope()
+        return res
 
     def walk_stmt_block(self, n: 'StmtBlock'):
         self.enter_scope(n)
-        super().walk_node(n)
+        res = super().visit_stmt_block(n, None)
         self.exit_scope()
+        return res
 
-    def walk_ident_expr(self, i: 'IdentExpr'):
+    def visit_ident_expr(self, i: 'IdentExpr', d: None):
         decl = self.find_decl(i.name)
         if decl is not None:
-            i.decl = decl
+            return IdentExpr(
+                name=i.name,
+                span=i.span,
+                decl=decl
+            )
         else:
-            self.compiler.add_error_to_node(i, f"Variable '{i.name}' not found.", "")
+            self.compiler.add_error_to_node(i, f"Symbol '{i.name}' not found.")
+            return i
+
+    def visit_dot_expr(self, n: 'DotExpr', data: None) -> 'Expr':
+        def check_module(rec: 'Expr'):
+            if not isinstance(rec, IdentExpr) or rec.decl is None or not isinstance(rec.decl, Import):
+                return None
+            m = rec.decl.imported_module
+            assert m is not None
+            return m
+
+        receiver = self.visit(n.receiver, None)
+        assert isinstance(receiver, Expr)
+        mod = check_module(receiver)
+        if mod is None:
+            self.compiler.add_error_to_node(
+                node=receiver,
+                message="Dot operations can only be used to reference module members"
+            )
+            return n
+        member = mod.get_declaration(n.name) if n.name in mod else None
+        if member is None:
+            self.compiler.add_error_to_node(
+                node=n,
+                message=f"Cannot find declaration '{n.name}' in module {mod.name}"
+            )
+            return n
+        # replace reference by ident
+        return IdentExpr(
+            name=f"{mod.name}@{n.name}",
+            decl=member,
+            span=n.span
+        )

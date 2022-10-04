@@ -24,7 +24,7 @@ class CompilationError:
         if self.hint != "":
             return f"{self.filepath}:{self.span}: {self.message}\n\tHint: {self.hint}"
         else:
-            return f"{self.filepath}:{self.span}: {self.message}\n"
+            return f"{self.filepath}:{self.span}: {self.message}"
 
 
 class ErrorCtx:

@@ -32,6 +32,11 @@ class TyPrimitive(Ty):
         return isinstance(other, TyPrimitive) and self.name == other.name
 
 
+class TyModule(TySpecial):
+    def __init__(self, modname: str):
+        super().__init__(f"module {modname}")
+
+
 TyUnknown = TySpecial(name="unknown")
 TyBuiltin = TySpecial(name="builtin")
 TyEntry = TySpecial(name="entry")

@@ -9,13 +9,14 @@ from pathlib import Path
 from typing import Union, List, Tuple
 from contextlib import redirect_stdout
 
-from main import run_compiler
+from main import run_compiler, RT_PATH, HERB_STD_PATH
 
 test_data_dir = Path("test") / "data"
 test_data_build = test_data_dir / "build"
 build_dir = Path("build")
 temp_program_path = build_dir / "testprog"
 runtime_path: Path
+herb_std_path: Path
 
 
 class TestType(Enum):
@@ -73,7 +74,7 @@ class Test:
         compiler_out = io.StringIO()
         with redirect_stdout(compiler_out):
             try:
-                ok = run_compiler(self.path, temp_program_path, runtime_path)
+                ok = run_compiler(self.path, temp_program_path)
             except Exception as e:
                 return TestType.CompilerCrashed, "", traceback.format_exc()
 

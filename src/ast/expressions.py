@@ -36,13 +36,10 @@ class FunCall(Expr):
 
 
 class IdentExpr(Expr):
-    name: str
-    decl: Union['Decl', None] = None
-
-    def __init__(self, *, name: str, **kwargs):
+    def __init__(self, *, name: str, decl: 'Union[Decl, None]' = None, **kwargs):
         super().__init__(**kwargs)
         self.name = name
-        self.decl = None
+        self.decl = decl
 
     def accept(self, visitor: 'AstVisitor', data: 'D') -> 'R':
         return visitor.visit_ident_expr(self, data)
@@ -130,3 +127,27 @@ class UnopExpr(Expr):
 
     def __str__(self):
         return f"{self.kind.value}{self.expr}"
+
+
+class DotExpr(Expr):
+    '''
+    After parsing DotExpr represents any expression mathing this rule: expr DOT IDENT.
+    After resolution phase all packageName.ident dot expression nodes are replaced by IdentExpr
+    '''
+
+    def __init__(self, *, receiver: 'Expr', name: str, **kwargs):
+        super().__init__(**kwargs)
+        self.receiver = receiver
+        self.name = name
+
+    def accept(self, visitor: 'AstVisitor[D, R]', data: 'D') -> 'R':
+        return visitor.visit_dot_expr(self, data)
+
+    def accept_children(self, visitor: 'AstVisitor[D, R]', data: 'D'):
+        visitor.visit(self.receiver, data)
+
+    def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
+        self.receiver = transformer.visit(self, data)
+
+    def __str__(self):
+        return f"{self.receiver}.{self.name}"

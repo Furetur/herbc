@@ -56,6 +56,7 @@ expr
     | STRINGLITERAL #strLit
     | IDENT #reference
     | '(' expr ')' #parenExpr
+    | receiver=expr '.' IDENT #dotExpr
     | callee=expr '(' commaSeparatedExprs? ')' #funCall
     | op=('-' | '!') expr #unaryopExpr
     | expr op=('*' | '/' | '%' | '&') expr #binopExpr

@@ -3,13 +3,18 @@ import sys
 from pathlib import Path
 from argparse import ArgumentParser
 
-from src.defs.constants import RUNTIME_DIR_NAME
+from src.defs.constants import RUNTIME_DIR_NAME, HERB_STD_DIR_NAME, HERB_STD_PACKAGE_NAME
 from src.normalize import normalize
 from src.context.compilation_ctx import CompilationCtx
 from src.context.project_ctx import ProjectCtx
 from src.context.error_ctx import CompilationInterrupted, ErrorCtx
 from src.gen.generate import generate
 from src.loader import Loader
+
+
+COMPILER_PATH = Path(os.path.abspath(__file__)).parent
+RT_PATH = COMPILER_PATH / RUNTIME_DIR_NAME
+HERB_STD_PATH = COMPILER_PATH / HERB_STD_DIR_NAME
 
 
 def main():
@@ -29,16 +34,18 @@ def main():
     else:
         output_file_path = entry_file_path.parent / entry_file_path.stem
 
-    runtime_path = Path(os.path.abspath(__file__)).parent / RUNTIME_DIR_NAME
-
-    ok = run_compiler(entry_file_path, output_file_path, runtime_path)
+    ok = run_compiler(entry_file_path, output_file_path)
     if not ok:
         exit(1)
 
 
-def run_compiler(filepath: Path, outpath: Path, runtime_path: Path) -> bool:
+def run_compiler(filepath: Path, outpath: Path) -> bool:
     compiler = CompilationCtx(
-        project=ProjectCtx(root=filepath.parent, root_packages=dict(), runtime=runtime_path),
+        project=ProjectCtx(
+            root=filepath.parent,
+            root_packages={HERB_STD_PACKAGE_NAME: HERB_STD_PATH},
+            runtime=RT_PATH
+        ),
         errors=ErrorCtx(),
         outpath=outpath,
     )
@@ -46,15 +53,15 @@ def run_compiler(filepath: Path, outpath: Path, runtime_path: Path) -> bool:
 
     compiler.project.build_dir().mkdir(exist_ok=True)
     try:
-        loader.load_file(filepath)
+        entrymod = loader.load_file(filepath)
         modules = loader.get_loaded_modules()
         for mod in modules:
-            normalize(compiler, mod)
+            normalize(compiler, mod, is_entry=mod == entrymod)
         generate(compiler, modules)
     except CompilationInterrupted as e:
         compiler.errors.print_errors()
         if e.message != "":
-            print(f"ERROR: {e.message}")
+            print(f"\nERROR: {e.message}")
         else:
             print("Compilation failed!")
         return False

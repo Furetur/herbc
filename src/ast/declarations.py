@@ -36,7 +36,8 @@ class Import(Decl):
         return self.alias if self.alias != "" else self.path[-1]
 
     def value_ty(self) -> Ty:
-        return TySpecial(name=f"module {self.declared_name()}")
+        modname = self.imported_module.name if self.imported_module is not None else "???"
+        return TyModule(modname)
 
     def has_alias(self) -> bool:
         return self.alias != ""

@@ -3,7 +3,7 @@ from typing import Tuple
 
 from src.ast import Import, Module, Stmt, FunDecl, ExprStmt, IntLiteral, FunCall, Expr, Decl, VarDecl, Scope, IdentExpr, \
     BoolLiteral, StrLiteral, AssignStmt, BinopExpr, BinopKind, StmtBlock, IfStmt, WhileStmt, UnopExpr, UnopKind, \
-    ArgDecl, RetStmt, Entrypoint, fancy_pos
+    ArgDecl, RetStmt, Entrypoint, fancy_pos, DotExpr
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationError
 from src.span import Span, INVALID_SPAN
@@ -124,6 +124,13 @@ class HerbParserVisitor(HerbVisitor):
 
     def visitReference(self, ctx: HerbParser.ReferenceContext):
         return IdentExpr(name=str(ctx.IDENT()), span=Span.from_antlr(ctx))
+
+    def visitDotExpr(self, ctx:HerbParser.DotExprContext):
+        return DotExpr(
+            receiver=self.visit(ctx.receiver),
+            name=str(ctx.IDENT()),
+            span=Span.from_antlr(ctx)
+        )
 
     # ===== STATEMENTS =====
 

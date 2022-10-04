@@ -8,9 +8,9 @@ from src.normalize.resolve import resolve
 from src.normalize.typecheck import typecheck
 
 
-def normalize(ctx: CompilationCtx, module: Module):
+def normalize(ctx: CompilationCtx, module: Module, is_entry: bool = False):
     resolve(ctx, module)
-    if module.entry is None:
+    if is_entry and module.entry is None:
         ctx.add_error_to_node(
             node=module,
             message="Module must have an entrypoint defined",
@@ -22,3 +22,5 @@ def normalize(ctx: CompilationCtx, module: Module):
     typecheck(ctx, module)
     if ctx.has_errors():
         raise CompilationInterrupted()
+    if not is_entry:
+        module.entry = None

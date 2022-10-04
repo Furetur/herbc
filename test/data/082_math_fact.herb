@@ -1,0 +1,7 @@
+import herb.math;
+
+entrypoint {
+    print(math.fact(10));
+    print(" ");
+    print(math.fact(5));
+}

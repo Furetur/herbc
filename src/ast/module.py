@@ -11,10 +11,6 @@ if TYPE_CHECKING:
 
 
 class Module(Node, Scope):
-    path: Path
-    imports: List['Import']
-    top_level_decls: List['Decl']
-
     def __init__(self, *, path: Path, imports: List['Import'], top_level_decls: List['Decl'], entry: Union['Entrypoint', None], **kwargs):
         Node.__init__(self, **kwargs)
         Scope.__init__(self)

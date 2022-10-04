@@ -69,6 +69,9 @@ class AstVisitor(Generic[D, R], ABC):
     def visit_print(self, n: 'Print', data: D) -> R:
         return self.visit_expression(n, data)
 
+    def visit_dot_expr(self, n: 'DotExpr', data: D) -> R:
+        return self.visit_expression(n, data)
+
     # statements
 
     def visit_stmt_block(self, n: 'StmtBlock', data: D) -> R:
