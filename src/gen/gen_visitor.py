@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Dict
+from typing import Dict, List
 
 from src.ast import AstVisitor, Module, FunDecl, IntLiteral, FunCall, BoolLiteral, Node, StrLiteral, VarDecl, \
     Print, IdentExpr, AssignStmt, BinopKind, IfStmt, WhileStmt, BinopExpr, UnopExpr, UnopKind, RetStmt, Entrypoint
@@ -153,8 +153,7 @@ class GenVisitor(AstVisitor):
         self.builder.store(value, ptr)
 
     def visit_if_stmt(self, n: 'IfStmt', data):
-        # the basic block after the if statement
-        after = self.builder.append_basic_block()
+        not_terminated_blocks: List[ir.IRBuilder] = []
 
         for cond, block in n.condition_branches:
             then = self.builder.append_basic_block()
@@ -165,7 +164,7 @@ class GenVisitor(AstVisitor):
             self.builder = ir.IRBuilder(then)
             self.visit(block, None)
             if not self.builder.block.is_terminated:
-                self.builder.branch(after) # IMPORTANT: jump to 'after'
+                not_terminated_blocks.append(self.builder)
             # switch to generating 'else'
             # the next if condition should be generated inside this else basic block
             self.builder = ir.IRBuilder(els)
@@ -175,8 +174,19 @@ class GenVisitor(AstVisitor):
         if n.else_branch is not None:
             self.visit(n.else_branch, None)
         if not self.builder.block.is_terminated:
-            self.builder.branch(after) # IMPORTANT: jump to 'after'
-        self.builder = ir.IRBuilder(after)
+            not_terminated_blocks.append(self.builder)
+        # If there are not terminated blocks
+        # then this if statement does not terminate and there's some code after it
+        # Therefore, we need to generate a new 'after' basic block for that code
+        # We also branch from every not terminated block to the 'after' block
+        if len(not_terminated_blocks) > 0:
+            after = self.builder.append_basic_block()
+            for b in not_terminated_blocks:
+                b.branch(after)
+            self.builder = ir.IRBuilder(after)
+        else:
+            # set to None to catch any bugs
+            self.builder = None
 
     def visit_while_stmt(self, n: 'WhileStmt', data):
         for var in find_descendants_of_type(n, VarDecl):
