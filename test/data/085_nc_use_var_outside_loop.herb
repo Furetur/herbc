@@ -1,0 +1,18 @@
+fn fib(n: int) -> int {
+    var a = 1;
+    var b = 1;
+
+    var i = 2;
+
+    while i < n {
+        var next = a + b;
+        a = b;
+        b = next;
+        i = i + 1;
+    }
+    return next;
+}
+
+entrypoint {
+    fib(10);
+}

@@ -135,6 +135,9 @@ class WhileStmt(Stmt):
         self.cond = transformer.visit(self.cond, data)
         self.body = transformer.visit(self.body, data)
 
+    def __str__(self):
+        return f"while {self.cond} {self.body}"
+
 
 class RetStmt(Stmt):
     expr: 'Union[Expr, None]'
@@ -156,3 +159,6 @@ class RetStmt(Stmt):
     def transform_children(self, transformer: 'AstTransformer[D]', data: 'D'):
         if self.expr is not None:
             self.expr = transformer.visit(self.expr, data)
+
+    def __str__(self):
+        return f"return {self.expr};"

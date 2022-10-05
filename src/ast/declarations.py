@@ -176,7 +176,7 @@ class VarDecl(Decl):
         return self.name
 
     def __str__(self):
-        return f"const {self.name}: {self.ty or '?'} = {self.initializer};"
+        return f"var {self.name}: {self.ty or '?'} = {self.initializer};"
 
 
 class BuiltinDecl(Decl):

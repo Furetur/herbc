@@ -1,7 +1,10 @@
 import herb.math;
 
 entrypoint {
-    print(math.phi(120));
-    print(" ");
-    print(math.fib(960));
+    var i = 1;
+    while i < 10000 {
+        print(math.phi(i));
+        print(",");
+        i = i + 100;
+    }
 }

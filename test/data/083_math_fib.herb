@@ -1,7 +1,10 @@
 import herb.math;
 
 entrypoint {
-    print(math.fib(30));
-    print(" ");
-    print(math.fib(40));
+    var i = 1;
+    while i < 40 {
+        print(math.fib(i));
+        print(",");
+        i = i + 1;
+    }
 }

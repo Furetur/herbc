@@ -49,5 +49,6 @@ class Module(Node, Scope):
         return hashed + "_" + self.name
 
     def __str__(self):
-        decl = "\n".join([str(i) for i in self.declarations])
-        return f"// Module {self.path}\n{decl}"
+        imp = "\n".join(str(i) for i in self.imports)
+        decl = "\n".join([str(i) for i in self.top_level_decls])
+        return f"// Module {self.path}\n{imp}{decl}"

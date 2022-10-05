@@ -23,13 +23,13 @@ fn fib(n: int) -> int {
 
     var i = 2;
 
-    while i < 10 {
+    while i < n {
         var next = a + b;
         a = b;
         b = next;
         i = i + 1;
     }
-    return next;
+    return b;
 }
 
 fn phi(x: int) -> int {

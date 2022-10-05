@@ -13,6 +13,7 @@ def typecheck(ctx: CompilationCtx, mod: Module):
     v.walk(mod)
     v = FunctionTerminationChecker(ctx)
     v.visit(mod, None)
+    return mod
 
 
 # (operand_type, result_type)

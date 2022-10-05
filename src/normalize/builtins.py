@@ -1,10 +1,13 @@
 from src.ast import FunCall, Module, AstTransformer, Node, IdentExpr, Expr
 from src.ast.builtins import Print, PrintBuiltinDecl
+from src.ast.fixverify import set_parents
 from src.context.compilation_ctx import CompilationCtx
 
 
 def builtins(ctx: CompilationCtx, mod: Module):
-    mod.accept(PrintTransformer(ctx), None)
+    mod = mod.accept(PrintTransformer(ctx), None)
+    set_parents(mod)
+    return mod
 
 
 class PrintTransformer(AstTransformer):

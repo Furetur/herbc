@@ -2,6 +2,7 @@ from typing import Union, List, cast
 
 from src.ast import Module, AstWalker, Scope, Decl, FunDecl, IdentExpr, VarDecl, Import, FunCall, Node, Literal, \
     StmtBlock, builtin_declarations, Entrypoint, AstTransformer, Expr, DotExpr
+from src.ast.fixverify import set_parents
 from src.ast.utils import is_top_level, fancy_pos, outerscope
 from src.context.compilation_ctx import CompilationCtx
 from src.context.error_ctx import CompilationInterrupted
@@ -14,9 +15,11 @@ def resolve(compiler: CompilationCtx, mod: Module):
     if compiler.has_errors():
         raise CompilationInterrupted()
     v = ResolverTransformer(compiler)
-    mod.accept(v, None)
+    mod = mod.accept(v, None)
     if compiler.has_errors():
         raise CompilationInterrupted()
+    set_parents(mod)
+    return mod
 
 
 def reorder_top_level_decls(m: Module):
@@ -114,7 +117,7 @@ class ResolverTransformer(AstTransformer):
         self.exit_scope()
         return res
 
-    def walk_stmt_block(self, n: 'StmtBlock'):
+    def visit_stmt_block(self, n: 'StmtBlock', d):
         self.enter_scope(n)
         res = super().visit_stmt_block(n, None)
         self.exit_scope()
