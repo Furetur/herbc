@@ -1,3 +1,5 @@
+var PI = 3;
+
 fn fact(n: int) -> int {
     if n <= 1 {
         return 1;

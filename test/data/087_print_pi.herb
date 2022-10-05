@@ -1,0 +1,11 @@
+import herb.math;
+
+fn printpi() {
+    print(math.PI);
+}
+
+entrypoint {
+    printpi();
+    math.PI = 4;
+    printpi();
+}
